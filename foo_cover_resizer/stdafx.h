@@ -1,0 +1,24 @@
+#pragma once
+#define _WIN32_WINNT _WIN32_WINNT_WIN7
+#define WINVER _WIN32_WINNT_WIN7
+#define NOMINMAX
+
+#include <algorithm>
+#include <array>
+#include <map>
+#include <ranges>
+#include <set>
+
+#include "resource.h"
+#include <foobar2000/SDK/foobar2000.h>
+#include <atlbase.h>
+#include <atlapp.h>
+#include <atlctrls.h>
+#include <atlcrack.h>
+
+#include <gdiplus.h>
+#pragma comment(lib, "gdiplus.lib")
+
+#include "foo_cover_resizer.h"
+#include "CoverRemover.h"
+#include "CoverResizer.h"

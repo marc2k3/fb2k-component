@@ -1,0 +1,34 @@
+#include "resource.h"
+#include <winresrc.h>
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG DIALOGEX 0, 0, 184, 72
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Cover Resizer"
+FONT 8, "Segoe UI", 400, 0, 0x0
+BEGIN
+    LTEXT           "Type", IDC_STATIC, 7, 7, 30, 8
+    LTEXT           "Format", IDC_STATIC, 7, 22, 30, 8
+    LTEXT           "Max size", IDC_STATIC, 7, 37, 30, 8
+
+    COMBOBOX        IDC_COMBO_TYPE, 45, 5, 133, 14, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_FORMAT, 45, 20, 133, 14, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_EDIT_SIZE, 45, 35, 133, 14, ES_NUMBER | ES_AUTOHSCROLL
+
+    DEFPUSHBUTTON   "OK", IDOK, 74, 52, 50, 14
+    PUSHBUTTON      "Cancel", IDCANCEL, 128, 52, 50, 14
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
