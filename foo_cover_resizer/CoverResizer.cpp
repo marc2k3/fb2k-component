@@ -41,7 +41,7 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 
 	const bool convert_mode = m_size == 0; // not supplying a size means we're in convert to JPG mode
 
-	if (convert_mode)
+	if (convert_mode || m_format == 1)
 	{
 		const auto& it = s_encoder_map.find(mime_jpeg);
 		if (it == s_encoder_map.end()) // should never ever happen
@@ -50,6 +50,16 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 			return;
 		}
 		m_clsid_jpeg = it->second;
+	}
+	else if (m_format == 2)
+	{
+		const auto& it = s_encoder_map.find(mime_png);
+		if (it == s_encoder_map.end()) // should never ever happen
+		{
+			popup_message::g_show("Internal error. Unable to determine CLSID required to save as PNG.", group_resize);
+			return;
+		}
+		m_clsid_png = it->second;
 	}
 
 	album_art_editor::ptr editor_ptr;
@@ -97,30 +107,29 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 				const int new_width = static_cast<int>(dw * s);
 				const int new_height = static_cast<int>(dh * s);
 
-				std::string mime;
+				CLSID clsid{};
 				switch (m_format)
 				{
-				case 0:
-					mime = info.mime; 
+				case 0: // maintain original
+					if (!s_encoder_map.contains(info.mime)) // this map only contains gdiplus encoders, can't save as webp
+					{
+						FB2K_console_formatter() << "Cannot resize image found in " << path << ".";
+						FB2K_console_formatter() << "Type not supported: " << info.mime;
+						continue;
+					}
+					clsid = s_encoder_map.at(info.mime);
 					break;
 				case 1:
-					mime = mime_jpeg;
+					clsid = m_clsid_jpeg;
 					break;
 				case 2:
-					mime = mime_png;
+					clsid = m_clsid_png;
 					break;
-				}
-
-				if (!s_encoder_map.contains(mime)) // using gdiplus so writing webp is not supported
-				{
-					FB2K_console_formatter() << "Cannot resize image found in " << path << ".";
-					FB2K_console_formatter() << "Type not supported: " << mime.c_str();
-					continue;
 				}
 
 				auto resized = resize(image, new_width, new_height);
 				if (!resized || resized->GetLastStatus() != Gdiplus::Ok) continue;
-				if (resized->Save(stream.get_ptr(), &s_encoder_map.at(mime)) != Gdiplus::Ok) continue;
+				if (resized->Save(stream.get_ptr(), &clsid) != Gdiplus::Ok) continue;
 			}
 
 			HGLOBAL hg = nullptr;

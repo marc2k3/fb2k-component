@@ -13,7 +13,7 @@ private:
 
 	inline static std::map<std::string, CLSID> s_encoder_map;
 
-	CLSID m_clsid_jpeg{};
+	CLSID m_clsid_jpeg{}, m_clsid_png{};
 	GUID m_what{};
 	metadb_handle_list m_handles;
 	int m_format = 0, m_size = 0;
