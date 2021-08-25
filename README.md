@@ -24,8 +24,6 @@ foobar2000 /run_main:Library/Search
 
 ## foo_cover_info
 
-### Download
-
 ### Breaking changes in component version `v0.1.0` released on `07/04/2021`.
 
 - All previously saved data will be lost as the internal storage mechanism has changed. All files will need to be scanned again.
@@ -44,7 +42,7 @@ Because it's not possible to query files for embedded album art within foobar200
 %front_cover_bytes% (raw image size)
 ```
 
-Note that database records are attached to the `%path%` of each file so if files are renamed or moved, associated data will be orphaned and the files will need re-scanning.
+Note that database records are attached to the `%path%` of each file so if files are renamed or moved, associated data will be orphaned and the files will need re-scanning. Like `foo_playcount`, database records have a lifetime of 4 weeks if they are not included in the `Media Library` or playlist.
 
 Use the right click on any library/playlist selection to scan or clear existing info.
 
@@ -52,4 +50,4 @@ Use the right click on any library/playlist selection to scan or clear existing 
 
 This component resizes embedded album art. There is full support for preserving the image type if they are JPG/PNG/TIFF/GIF/BMP or you can convert any format to JPG or PNG. Reading and resizing WEBP is supported but it cannot be written back as WEBP. JPG/PNG can be chosen as an alternative.
 
-Additionally, there is a further option to convert the front cover to JPG without resizing. Lastly, there is an option to remove all embedded art except the front cover as this is the most common type people want to keep. Use the right click on any library/playlist selection to access the various options.
+Additionally, there is a further option to convert the front cover to JPG without resizing. Lastly, there is an option to remove all embedded art except the front cover as this is the most common type people want to keep. Use the right click menu on any library/playlist selection to access the various options.
