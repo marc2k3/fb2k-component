@@ -80,10 +80,11 @@ namespace
 	private:
 		bool execute_recur(mainmenu_node::ptr node, stringp parent_path)
 		{
-			string8 path = parent_path.get_ptr();
 			string8 text;
 			uint32_t flags;
 			node->get_display(text, flags);
+
+			string8 path = parent_path.get_ptr();
 			path.add_string(text);
 
 			switch (node->get_type())
