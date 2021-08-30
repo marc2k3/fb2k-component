@@ -138,19 +138,6 @@ namespace cinfo
 		return metadb_index_manager::get();
 	}
 
-	void get_hashes(metadb_handle_list_cref handles, hash_set& hashes)
-	{
-		const uint32_t count = handles.get_count();
-		for (const uint32_t i : std::views::iota(0U, count))
-		{
-			metadb_index_hash hash;
-			if (hashHandle(handles[i], hash))
-			{
-				hashes.emplace(hash);
-			}
-		}
-	}
-
 	void refresh(const hash_list& hashes)
 	{
 		fb2k::inMainThread([hashes]
@@ -163,12 +150,16 @@ namespace cinfo
 	{
 		hash_list to_refresh;
 		hash_set hashes;
-		get_hashes(handles, hashes);
 
-		for (const auto& hash : hashes)
+		const uint32_t count = handles.get_count();
+		for (const uint32_t i : std::views::iota(0U, count))
 		{
-			set(hash, Fields());
-			to_refresh += hash;
+			metadb_index_hash hash;
+			if (hashHandle(handles[i], hash) && hashes.emplace(hash).second)
+			{
+				set(hash, Fields());
+				to_refresh += hash;
+			}
 		}
 		refresh(to_refresh);
 	}
