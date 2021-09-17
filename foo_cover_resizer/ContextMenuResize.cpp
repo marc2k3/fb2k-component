@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "PopupDialog.h"
 
 using namespace resizer;
 
@@ -44,7 +43,7 @@ public:
 			PopupDialog dlg;
 			if (dlg.DoModal(hwnd) == IDOK)
 			{
-				auto cb = fb2k::service_new<CoverResizer>(handles, album_art_ids::query_type(prefs::type.get_value()), prefs::format.get_value(), prefs::size.get_value());
+				auto cb = fb2k::service_new<CoverResizer>(handles, album_art_ids::query_type(prefs::type.get_value()));
 				threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Resizing covers...");
 			}
 		}

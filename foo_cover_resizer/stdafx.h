@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <map>
+#include <optional>
 #include <ranges>
 #include <set>
 
@@ -19,6 +20,10 @@
 #include <gdiplus.h>
 #pragma comment(lib, "gdiplus.lib")
 
+using namespace pfc::stringcvt;
+using MimeCLSID = std::optional<CLSID>;
+
 #include "foo_cover_resizer.h"
+#include "PopupDialog.h"
 #include "CoverRemover.h"
 #include "CoverResizer.h"

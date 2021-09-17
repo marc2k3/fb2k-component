@@ -2,19 +2,9 @@
 
 using namespace resizer;
 
-CoverResizer::CoverResizer(metadb_handle_list_cref handles, const GUID& what, int format, int size) : m_handles(handles), m_what(what), m_format(format), m_size(size) {}
-CoverResizer::CoverResizer(metadb_handle_list_cref handles, const GUID& what) : m_handles(handles), m_what(what) {}
+CoverResizer::CoverResizer(metadb_handle_list_cref handles, const GUID& what, bool convert_only) : m_handles(handles), m_what(what), m_convert_only(convert_only) {}
 
-std::unique_ptr<Gdiplus::Bitmap> CoverResizer::resize(const std::unique_ptr<Gdiplus::Image>& source, int width, int height)
-{
-	auto bitmap = std::make_unique<Gdiplus::Bitmap>(width, height, PixelFormat32bppPARGB);
-	Gdiplus::Graphics g(bitmap.get());
-	g.SetInterpolationMode(Gdiplus::InterpolationMode::InterpolationModeHighQuality);
-	g.DrawImage(source.get(), 0, 0, width, height);
-	return bitmap;
-}
-
-void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
+MimeCLSID CoverResizer::get_clsid(const std::string& str)
 {
 	if (s_encoder_map.empty())
 	{
@@ -26,12 +16,54 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 			{
 				for (const auto& codec : std::ranges::views::take(codecs, num))
 				{
-					s_encoder_map.emplace(pfc::stringcvt::string_utf8_from_wide(codec.MimeType).get_ptr(), codec.Clsid);
+					s_encoder_map.emplace(string_utf8_from_wide(codec.MimeType).get_ptr(), codec.Clsid);
 				}
 			}
 		}
 	}
 
+	const auto& it = s_encoder_map.find(str);
+	if (it != s_encoder_map.end())
+	{
+		return std::make_optional<CLSID>(it->second);
+	}
+	return std::nullopt;
+}
+
+album_art_data_ptr CoverResizer::istream_to_data(IStream* stream)
+{
+	album_art_data_ptr data;
+	HGLOBAL hg = nullptr;
+	if (FAILED(GetHGlobalFromStream(stream, &hg))) return data;
+	const ULONG new_size = GlobalSize(hg);
+	LPVOID pimage = GlobalLock(hg);
+	std::vector<uint8_t> buffer(new_size);
+	memcpy(buffer.data(), pimage, buffer.size());
+	GlobalUnlock(hg);
+
+	data = album_art_data_impl::g_create(buffer.data(), buffer.size());
+	return data;
+}
+
+bool CoverResizer::resize(double max_size, const std::unique_ptr<Gdiplus::Image>& source, std::unique_ptr<Gdiplus::Bitmap>& out)
+{
+	const double dw = static_cast<double>(source->GetWidth());
+	const double dh = static_cast<double>(source->GetHeight());
+	if (dw <= max_size && dh <= max_size) return false; // bail if source image is already smaller than specified max_size
+
+	const double s = std::min(max_size / dw, max_size / dh);
+	const int new_width = static_cast<int>(dw * s);
+	const int new_height = static_cast<int>(dh * s);
+
+	out = std::make_unique<Gdiplus::Bitmap>(new_width, new_height, PixelFormat32bppPARGB);
+	Gdiplus::Graphics g(out.get());
+	g.SetInterpolationMode(Gdiplus::InterpolationMode::InterpolationModeHighQuality);
+	g.DrawImage(source.get(), 0, 0, new_width, new_height);
+	return true;
+}
+
+void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
+{
 	auto image_api = fb2k::imageLoaderLite::tryGet();
 	if (image_api.is_empty())
 	{
@@ -39,27 +71,25 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 		return;
 	}
 
-	const bool convert_mode = m_size == 0; // not supplying a size means we're in convert to JPG mode
+	const int format = prefs::format.get_value();
 
-	if (convert_mode || m_format == 1)
+	if (m_convert_only || format == 1)
 	{
-		const auto& it = s_encoder_map.find(mime_jpeg);
-		if (it == s_encoder_map.end()) // should never ever happen
+		m_clsid_jpeg = get_clsid(mime_jpeg);
+		if (!m_clsid_jpeg.has_value()) // should never ever happen
 		{
 			popup_message::g_show("Internal error. Unable to determine CLSID required to save as JPG.", group_resize);
 			return;
 		}
-		m_clsid_jpeg = it->second;
 	}
-	else if (m_format == 2)
+	else if (format == 2)
 	{
-		const auto& it = s_encoder_map.find(mime_png);
-		if (it == s_encoder_map.end()) // should never ever happen
+		m_clsid_png = get_clsid(mime_png);
+		if (!m_clsid_png.has_value()) // should never ever happen
 		{
 			popup_message::g_show("Internal error. Unable to determine CLSID required to save as PNG.", group_resize);
 			return;
 		}
-		m_clsid_png = it->second;
 	}
 
 	album_art_editor::ptr editor_ptr;
@@ -67,7 +97,7 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 	auto lock_api = file_lock_manager::get();
 
 	const uint32_t count = m_handles.get_count();
-	const double dmax = static_cast<double>(m_size);
+	const double dmax = static_cast<double>(prefs::size.get_value());
 	std::set<pfc::string8> paths;
 	uint32_t success = 0;
 
@@ -93,31 +123,24 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 			pfc::com_ptr_t<IStream> stream;
 			if (FAILED(CreateStreamOnHGlobal(nullptr, TRUE, stream.receive_ptr()))) continue;
 
-			if (convert_mode)
+			if (m_convert_only)
 			{
 				if (info.formatName == nullptr || _stricmp(info.formatName, "jpeg") == 0 || _stricmp(info.formatName, "jpg") == 0) continue;
-				if (image->Save(stream.get_ptr(), &m_clsid_jpeg) != Gdiplus::Ok) continue;
+				if (image->Save(stream.get_ptr(), &m_clsid_jpeg.value()) != Gdiplus::Ok) continue;
 			}
 			else
 			{
-				const double dw = static_cast<double>(info.width);
-				const double dh = static_cast<double>(info.height);
-				if (dw <= dmax && dh <= dmax) continue;
-				const double s = std::min(dmax / dw, dmax / dh);
-				const int new_width = static_cast<int>(dw * s);
-				const int new_height = static_cast<int>(dh * s);
-
-				CLSID clsid{};
-				switch (m_format)
+				MimeCLSID clsid{};
+				switch (format)
 				{
 				case 0: // maintain original
-					if (!s_encoder_map.contains(info.mime)) // this map only contains gdiplus encoders, can't save as webp
+					clsid = get_clsid(info.mime);
+					if (!clsid.has_value())
 					{
 						FB2K_console_formatter() << "Cannot resize image found in " << path << ".";
 						FB2K_console_formatter() << "Type not supported: " << info.mime;
 						continue;
 					}
-					clsid = s_encoder_map.at(info.mime);
 					break;
 				case 1:
 					clsid = m_clsid_jpeg;
@@ -127,20 +150,13 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 					break;
 				}
 
-				auto resized = resize(image, new_width, new_height);
-				if (!resized || resized->GetLastStatus() != Gdiplus::Ok) continue;
-				if (resized->Save(stream.get_ptr(), &clsid) != Gdiplus::Ok) continue;
+				std::unique_ptr<Gdiplus::Bitmap> resized;
+				if (!resize(dmax, image, resized)) continue;
+				if (resized->GetLastStatus() != Gdiplus::Ok) continue;
+				if (resized->Save(stream.get_ptr(), &clsid.value()) != Gdiplus::Ok) continue;
 			}
 
-			HGLOBAL hg = nullptr;
-			if (FAILED(GetHGlobalFromStream(stream.get_ptr(), &hg))) continue;
-			const ULONG new_size = GlobalSize(hg);
-			LPVOID pimage = GlobalLock(hg);
-			std::vector<uint8_t> buffer(new_size);
-			memcpy(buffer.data(), pimage, buffer.size());
-			GlobalUnlock(hg);
-
-			data = album_art_data_impl::g_create(buffer.data(), buffer.size());
+			data = istream_to_data(stream.get_ptr());
 			if (data.is_empty()) continue;
 
 			auto lock = lock_api->acquire_write(path, abort);

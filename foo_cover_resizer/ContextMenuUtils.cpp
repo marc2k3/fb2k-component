@@ -40,9 +40,9 @@ public:
 		
 		if (index == 0)
 		{
-			if (MessageBoxW(hwnd, L"This option will ignore any images that are already JPG. Continue?", pfc::stringcvt::string_wide_from_utf8_fast(group_utils), MB_ICONWARNING | MB_SETFOREGROUND | MB_YESNO) == IDYES)
+			if (MessageBoxW(hwnd, L"This option will ignore any images that are already JPG. Continue?", string_wide_from_utf8_fast(group_utils), MB_ICONWARNING | MB_SETFOREGROUND | MB_YESNO) == IDYES)
 			{
-				auto cb = fb2k::service_new<CoverResizer>(handles, album_art_ids::cover_front);
+				auto cb = fb2k::service_new<CoverResizer>(handles, album_art_ids::cover_front, true);
 				threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Converting front covers to JPG...");
 			}
 		} 

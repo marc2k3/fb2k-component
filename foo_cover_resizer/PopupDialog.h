@@ -11,16 +11,16 @@ namespace resizer
 
 	namespace defaults
 	{
-		constexpr int type = 0;
-		constexpr int format = 0;
-		constexpr int size = 500;
+		static constexpr int type = 0;
+		static constexpr int format = 0;
+		static constexpr int size = 500;
 	}
 
 	namespace prefs
 	{
-		cfg_int type(guid_type, defaults::type);
-		cfg_int format(guid_format, defaults::format);
-		cfg_int size(guid_size, defaults::size);
+		static cfg_int type(guid_type, defaults::type);
+		static cfg_int format(guid_format, defaults::format);
+		static cfg_int size(guid_size, defaults::size);
 	}
 
 	class PopupDialog : public CDialogImpl<PopupDialog>
@@ -43,7 +43,7 @@ namespace resizer
 
 			for (const uint32_t i : std::views::iota(0U, album_art_ids::num_types()))
 			{
-				m_combo_type.AddString(pfc::stringcvt::string_wide_from_utf8_fast(album_art_ids::query_capitalized_name(i)));
+				m_combo_type.AddString(string_wide_from_utf8_fast(album_art_ids::query_capitalized_name(i)));
 			}
 
 			for (const auto& format : formats)
