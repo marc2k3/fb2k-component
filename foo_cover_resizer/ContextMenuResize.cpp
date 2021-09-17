@@ -8,6 +8,7 @@ public:
 	GUID get_item_guid(uint32_t index) override
 	{
 		if (index == 0) return guid_context_command_resize;
+		else if (index == 1) return guid_context_command_attach_and_resize;
 		else uBugCheck();
 	}
 
@@ -28,30 +29,136 @@ public:
 		return true;
 	}
 
+	bool browse_for_image(HWND parent, const std::string& folder, fb2k::imageInfo_t& info, std::unique_ptr<Gdiplus::Image>& out)
+	{
+		auto image_api = fb2k::imageLoaderLite::tryGet();
+		if (image_api.is_valid())
+		{
+			pfc::string8 path;
+			if (uGetOpenFileName(parent, "Picture files|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.tiff;*.webp", 0, nullptr, "Browse for image", folder.starts_with("file://") ? folder.c_str() : nullptr, path, FALSE))
+			{
+				std::wstring wpath = string_wide_from_utf8_fast(path).get_ptr();
+
+				pfc::com_ptr_t<IStream> stream;
+				if (SUCCEEDED(SHCreateStreamOnFileEx(wpath.data(), STGM_READ | STGM_SHARE_DENY_WRITE, GENERIC_READ, FALSE, nullptr, stream.receive_ptr())))
+				{
+					STATSTG sts;
+					if (SUCCEEDED(stream->Stat(&sts, STATFLAG_DEFAULT)))
+					{
+						const DWORD bytes = sts.cbSize.LowPart;
+						std::vector<uint8_t> buffer(bytes);
+						ULONG bytes_read = 0;
+						if (SUCCEEDED(stream->Read(buffer.data(), bytes, &bytes_read)) && bytes == bytes_read)
+						{
+							album_art_data_ptr data = album_art_data_impl::g_create(buffer.data(), buffer.size());
+
+							if (data.is_valid())
+							{
+								try
+								{
+									std::unique_ptr<Gdiplus::Image> image(image_api->load(data, &info));
+									out = std::move(image);
+									return true;
+								}
+								catch (const std::exception& e)
+								{
+									popup_message::g_show(e.what(), group_resize);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			popup_message::g_show(image_loader_error, group_resize);
+		}
+		return false;
+	}
+
+	bool popup(HWND parent)
+	{
+		modal_dialog_scope scope;
+		if (scope.can_create())
+		{
+			scope.initialize(parent);
+			PopupDialog dlg;
+			return dlg.DoModal(parent) == IDOK;
+		}
+		return false;
+	}
+
 	uint32_t get_num_items() override
 	{
-		return 1;
+		return 2;
 	}
 
 	void context_command(uint32_t index, metadb_handle_list_cref handles, const GUID& caller) override
 	{
-		HWND hwnd = core_api::get_main_window();
-		modal_dialog_scope scope;
-		if (scope.can_create())
+		const HWND hwnd = core_api::get_main_window();
+
+		if (index == 0)
 		{
-			scope.initialize(hwnd);
-			PopupDialog dlg;
-			if (dlg.DoModal(hwnd) == IDOK)
+			if (popup(hwnd))
 			{
 				auto cb = fb2k::service_new<CoverResizer>(handles, album_art_ids::query_type(prefs::type.get_value()));
 				threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Resizing covers...");
+			}
+		}
+		else if (index == 1)
+		{
+			fb2k::imageInfo_t info;
+			std::string folder(pfc::string_directory(handles[0]->get_path()));
+			std::unique_ptr<Gdiplus::Image> image;
+
+			if (browse_for_image(hwnd, folder, info, image) && popup(hwnd))
+			{
+				const int format = prefs::format.get_value();
+				MimeCLSID clsid{};
+				if (format == 0) clsid = CoverResizer::get_clsid(info.mime);
+				else if (format == 1) clsid = CoverResizer::get_clsid(mime_jpeg);
+				else if (format == 2) clsid = CoverResizer::get_clsid(mime_png);
+
+				if (clsid.has_value())
+				{
+					pfc::com_ptr_t<IStream> stream;
+					if (FAILED(CreateStreamOnHGlobal(nullptr, TRUE, stream.receive_ptr()))) return;
+
+					const GUID what = album_art_ids::query_type(prefs::type.get_value());
+					const double dmax = static_cast<double>(prefs::size.get_value());
+					std::unique_ptr<Gdiplus::Bitmap> resized;
+					if (CoverResizer::resize(dmax, image, resized)) // returns false if image is already smaller than specified max size
+					{
+						if (resized->GetLastStatus() != Gdiplus::Ok) return;
+						if (resized->Save(stream.get_ptr(), &clsid.value()) != Gdiplus::Ok) return;
+					}
+					else
+					{
+						if (image->Save(stream.get_ptr(), &clsid.value()) != Gdiplus::Ok) return;
+					}
+
+					album_art_data_ptr data = CoverResizer::istream_to_data(stream.get_ptr());
+
+					if (data.is_valid())
+					{
+						auto cb = fb2k::service_new<CoverAttach>(handles, what, data);
+						threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Attaching cover...");
+					}
+				}
+				else
+				{
+					popup_message::g_show("Cannot attach image due to invalid type.", group_resize);
+					return;
+				}
 			}
 		}
 	}
 
 	void get_item_name(uint32_t index, pfc::string_base& out) override
 	{
-		out = "Resize";
+		if (index == 0) out = "Resize";
+		else if (index == 1) out = "Attach image and Resize";
 	}
 };
 
