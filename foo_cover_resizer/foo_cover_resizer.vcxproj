@@ -102,6 +102,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CoverAttach.h" />
     <ClInclude Include="CoverRemover.h" />
     <ClInclude Include="CoverResizer.h" />
     <ClInclude Include="PopupDialog.h" />
