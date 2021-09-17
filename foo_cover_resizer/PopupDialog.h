@@ -21,6 +21,11 @@ namespace resizer
 		static cfg_int type(guid_type, defaults::type);
 		static cfg_int format(guid_format, defaults::format);
 		static cfg_int size(guid_size, defaults::size);
+
+		static GUID get_guid()
+		{
+			return album_art_ids::query_type(type.get_value());
+		}
 	}
 
 	class PopupDialog : public CDialogImpl<PopupDialog>

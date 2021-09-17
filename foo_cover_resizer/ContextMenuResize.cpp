@@ -42,7 +42,7 @@ public:
 		{
 			if (popup(hwnd))
 			{
-				auto cb = fb2k::service_new<CoverResizer>(handles, album_art_ids::query_type(prefs::type.get_value()));
+				auto cb = fb2k::service_new<CoverResizer>(handles);
 				threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Resizing covers...");
 			}
 		}
@@ -81,8 +81,7 @@ public:
 
 					if (data.is_valid())
 					{
-						const GUID what = album_art_ids::query_type(prefs::type.get_value());
-						auto cb = fb2k::service_new<CoverAttach>(handles, what, data);
+						auto cb = fb2k::service_new<CoverAttach>(handles, data);
 						threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Attaching cover...");
 					}
 				}

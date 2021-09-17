@@ -2,7 +2,7 @@
 
 using namespace resizer;
 
-CoverResizer::CoverResizer(metadb_handle_list_cref handles, const GUID& what, bool convert_only) : m_handles(handles), m_what(what), m_convert_only(convert_only) {}
+CoverResizer::CoverResizer(metadb_handle_list_cref handles, bool convert_only) : m_handles(handles), m_convert_only(convert_only) {}
 
 MimeCLSID CoverResizer::get_clsid(const std::string& str)
 {
@@ -84,6 +84,7 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 	album_art_extractor::ptr extractor_ptr;
 	auto lock_api = file_lock_manager::get();
 
+	const GUID what = m_convert_only ? album_art_ids::cover_front : prefs::get_guid();
 	const uint32_t count = m_handles.get_count();
 	const double dmax = static_cast<double>(prefs::size.get_value());
 	const int format = prefs::format.get_value();
@@ -104,7 +105,7 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 
 		try
 		{
-			album_art_data_ptr data = extractor_ptr->open(nullptr, path, abort)->query(m_what, abort);
+			album_art_data_ptr data = extractor_ptr->open(nullptr, path, abort)->query(what, abort);
 			if (data.is_empty()) continue;
 
 			fb2k::imageInfo_t info;
@@ -151,7 +152,7 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 			auto lock = lock_api->acquire_write(path, abort);
 			album_art_editor::g_get_interface(editor_ptr, path);
 			album_art_editor_instance_ptr aaep = editor_ptr->open(nullptr, path, abort);
-			aaep->set(m_what, data, abort);
+			aaep->set(what, data, abort);
 			aaep->commit(abort);
 			success++;
 		}
