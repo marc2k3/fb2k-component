@@ -2,7 +2,7 @@
 
 DECLARE_COMPONENT_VERSION(
 	"Cover Resizer",
-	"0.0.2",
+	"0.0.3-Beta",
 	"Copyright (C) 2021 marc2003\n\n"
 	"Build: " __TIME__ ", " __DATE__
 );
