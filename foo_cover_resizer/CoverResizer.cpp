@@ -67,29 +67,17 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 	auto image_api = fb2k::imageLoaderLite::tryGet();
 	if (image_api.is_empty())
 	{
-		popup_message::g_show("This component requires foobar2000 v1.6 or later.", group_resize);
+		popup_message::g_show(image_loader_error, group_resize);
 		return;
 	}
 
-	const int format = prefs::format.get_value();
+	m_clsid_jpeg = get_clsid(mime_jpeg);
+	m_clsid_png = get_clsid(mime_png);
 
-	if (m_convert_only || format == 1)
+	if (!m_clsid_jpeg.has_value() || !m_clsid_png.has_value()) // even if JPG/PNG were not requested, these failing would indicate something very wrong that would affect others too
 	{
-		m_clsid_jpeg = get_clsid(mime_jpeg);
-		if (!m_clsid_jpeg.has_value()) // should never ever happen
-		{
-			popup_message::g_show("Internal error. Unable to determine CLSID required to save as JPG.", group_resize);
-			return;
-		}
-	}
-	else if (format == 2)
-	{
-		m_clsid_png = get_clsid(mime_png);
-		if (!m_clsid_png.has_value()) // should never ever happen
-		{
-			popup_message::g_show("Internal error. Unable to determine CLSID required to save as PNG.", group_resize);
-			return;
-		}
+		popup_message::g_show(image_clsid_error, group_resize);
+		return;
 	}
 
 	album_art_editor::ptr editor_ptr;
@@ -98,6 +86,7 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 
 	const uint32_t count = m_handles.get_count();
 	const double dmax = static_cast<double>(prefs::size.get_value());
+	const int format = prefs::format.get_value();
 	std::set<pfc::string8> paths;
 	uint32_t success = 0;
 

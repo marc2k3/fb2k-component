@@ -4,6 +4,8 @@ namespace resizer
 {
 	static constexpr const char* group_resize = "Cover Resizer";
 	static constexpr const char* group_utils = "Cover Utils";
+	static constexpr const char* image_loader_error = "This component requires foobar2000 v1.6 or later.";
+	static constexpr const char* image_clsid_error = "Internal error. Unable to determine CLSID required to save image.";
 	static constexpr const char* mime_jpeg = "image/jpeg";
 	static constexpr const char* mime_png = "image/png";
 	static constexpr uint32_t threaded_process_flags = threaded_process::flag_show_progress | threaded_process::flag_show_delayed | threaded_process::flag_show_item | threaded_process::flag_show_abort;
