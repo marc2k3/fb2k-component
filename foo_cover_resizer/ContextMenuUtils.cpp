@@ -36,8 +36,8 @@ public:
 
 	void context_command(uint32_t index, metadb_handle_list_cref handles, const GUID& caller) override
 	{
-		HWND hwnd = core_api::get_main_window();
-		
+		const HWND hwnd = core_api::get_main_window();
+
 		if (index == 0)
 		{
 			if (MessageBoxW(hwnd, L"This option will ignore any images that are already JPG. Continue?", string_wide_from_utf8_fast(group_utils), MB_ICONWARNING | MB_SETFOREGROUND | MB_YESNO) == IDYES)
