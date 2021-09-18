@@ -88,7 +88,6 @@ public:
 				else
 				{
 					popup_message::g_show("Cannot attach image due to invalid type.", group_resize);
-					return;
 				}
 			}
 		}
