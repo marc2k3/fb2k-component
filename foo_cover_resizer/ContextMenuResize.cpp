@@ -103,47 +103,39 @@ private:
 	bool browse_for_image(HWND parent, const std::string& folder, fb2k::imageInfo_t& info, std::unique_ptr<Gdiplus::Image>& out)
 	{
 		auto image_api = fb2k::imageLoaderLite::tryGet();
-		if (image_api.is_valid())
-		{
-			pfc::string8 path;
-			if (uGetOpenFileName(parent, "Picture files|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.tiff;*.webp", 0, nullptr, "Browse for image", folder.starts_with("file://") ? folder.c_str() : nullptr, path, FALSE))
-			{
-				std::wstring wpath = string_wide_from_utf8_fast(path).get_ptr();
-
-				pfc::com_ptr_t<IStream> stream;
-				if (SUCCEEDED(SHCreateStreamOnFileEx(wpath.data(), STGM_READ | STGM_SHARE_DENY_WRITE, GENERIC_READ, FALSE, nullptr, stream.receive_ptr())))
-				{
-					STATSTG sts;
-					if (SUCCEEDED(stream->Stat(&sts, STATFLAG_DEFAULT)))
-					{
-						const DWORD bytes = sts.cbSize.LowPart;
-						std::vector<uint8_t> buffer(bytes);
-						ULONG bytes_read = 0;
-						if (SUCCEEDED(stream->Read(buffer.data(), bytes, &bytes_read)) && bytes == bytes_read)
-						{
-							album_art_data_ptr data = album_art_data_impl::g_create(buffer.data(), buffer.size());
-
-							if (data.is_valid())
-							{
-								try
-								{
-									std::unique_ptr<Gdiplus::Image> image(image_api->load(data, &info));
-									out = std::move(image);
-									return true;
-								}
-								catch (const std::exception& e)
-								{
-									popup_message::g_show(e.what(), group_resize);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		else
+		if (image_api.is_empty())
 		{
 			popup_message::g_show(image_loader_error, group_resize);
+			return false;
+		}
+
+		pfc::string8 path;
+		if (uGetOpenFileName(parent, "Picture files|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.tiff;*.webp", 0, nullptr, "Browse for image", folder.starts_with("file://") ? folder.c_str() : nullptr, path, FALSE) == FALSE) return false;
+
+		std::wstring wpath = string_wide_from_utf8_fast(path).get_ptr();
+		pfc::com_ptr_t<IStream> stream;
+		STATSTG sts;
+
+		if (FAILED(SHCreateStreamOnFileEx(wpath.data(), STGM_READ | STGM_SHARE_DENY_WRITE, GENERIC_READ, FALSE, nullptr, stream.receive_ptr()))) return false;
+		if (FAILED(stream->Stat(&sts, STATFLAG_DEFAULT))) return false;
+
+		const DWORD bytes = sts.cbSize.LowPart;
+		std::vector<uint8_t> buffer(bytes);
+		ULONG bytes_read = 0;
+
+		if (FAILED(stream->Read(buffer.data(), bytes, &bytes_read)) || bytes != bytes_read) return false;
+		album_art_data_ptr data = album_art_data_impl::g_create(buffer.data(), buffer.size());
+		if (data.is_empty()) return false;
+
+		try
+		{
+			std::unique_ptr<Gdiplus::Image> image(image_api->load(data, &info));
+			out = std::move(image);
+			return true;
+		}
+		catch (const std::exception& e)
+		{
+			popup_message::g_show(e.what(), group_resize);
 		}
 		return false;
 	}
