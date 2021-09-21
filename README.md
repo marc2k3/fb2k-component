@@ -64,7 +64,7 @@ This option lets you browse for an image file and will then resize (if needed) b
 
 Any art that is already `JPG` will be skipped.
 
-### Cover Utils/Remove all except front.
+### Cover Utils/Remove all except front
 
 Since most people only want front covers, this is a handy method for removing all the other types.
 
