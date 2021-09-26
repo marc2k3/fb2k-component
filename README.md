@@ -1,8 +1,8 @@
-# Minimum requirements
+## Minimum requirements
 
 `Windows 7` or later, `foobar2000` `v1.6` or later. 
 
-# Installation
+## Installation
 
 https://wiki.hydrogenaud.io/index.php?title=Foobar2000:How_to_install_a_component
 
@@ -10,7 +10,7 @@ https://wiki.hydrogenaud.io/index.php?title=Foobar2000:How_to_install_a_componen
 
 https://github.com/marc2k3/fb2k-component/releases
 
-## foo_run_main
+# foo_run_main
 
 Unlike the built in command line handler/`foo_runcmd`, this component has full support for dynamically generated menu commands meaning you can use `Edit` commands and switch playlists, change output devices etc.
 
@@ -24,7 +24,7 @@ foobar2000.exe /run_main:Library/Search
 foobar2000.exe /run_main:"Playback/Device/Primary Sound Driver"
 ```
 
-## foo_cover_info
+# foo_cover_info
 
 ### Breaking changes in component version `v0.1.0` released on `07/04/2021`.
 
@@ -48,7 +48,7 @@ Note that database records are attached to the `%path%` of each file so if files
 
 Use the right click menu on any library/playlist selection to scan or clear existing info.
 
-## foo_cover_resizer
+# foo_cover_resizer
 
 This component has 4 options available via the right click menu.
 
