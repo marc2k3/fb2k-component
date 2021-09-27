@@ -2,14 +2,18 @@
 
 using namespace resizer;
 
+static const std::vector<ContextItem> context_items =
+{
+	{ &guid_context_command_convert, "Convert front covers to JPG without resizng" },
+	{ &guid_context_command_remove_all_except_front, "Remove all except front" },
+};
+
 class ContextMenuUtils : public contextmenu_item_simple
 {
 public:
 	GUID get_item_guid(uint32_t index) override
 	{
-		if (index == 0) return guid_context_command_convert;
-		else if (index == 1) return guid_context_command_remove_all_except_front;
-		else uBugCheck();
+		return *context_items[index].guid;
 	}
 
 	GUID get_parent() override
@@ -31,7 +35,7 @@ public:
 
 	uint32_t get_num_items() override
 	{
-		return 2;
+		return context_items.size();
 	}
 
 	void context_command(uint32_t index, metadb_handle_list_cref handles, const GUID& caller) override
@@ -55,8 +59,7 @@ public:
 
 	void get_item_name(uint32_t index, pfc::string_base& out) override
 	{
-		if (index == 0) out = "Convert front covers to JPG without resizng";
-		else if (index == 1) out = "Remove all except front";
+		out = context_items[index].name;
 	}
 };
 

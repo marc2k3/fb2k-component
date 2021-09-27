@@ -2,10 +2,16 @@
 
 namespace cinfo
 {
-	static constexpr std::array command_names =
+	struct ContextItem
 	{
-		"Scan for Cover Info",
-		"Clear Cover Info"
+		const GUID* guid;
+		const pfc::string8 name;
+	};
+
+	static const std::vector<ContextItem> context_items =
+	{
+		{ &guid_context_scan, "Scan for Cover Info" },
+		{ &guid_context_clear, "Clear Cover Info" },
 	};
 
 	class ContextMenu : public contextmenu_item_simple
@@ -13,9 +19,7 @@ namespace cinfo
 	public:
 		GUID get_item_guid(uint32_t index) override
 		{
-			if (index == 0) return guid_context_scan;
-			else if (index == 1) return guid_context_clear;
-			else uBugCheck();
+			return *context_items[index].guid;
 		}
 
 		GUID get_parent() override
@@ -37,7 +41,7 @@ namespace cinfo
 
 		uint32_t get_num_items() override
 		{
-			return command_names.size();
+			return context_items.size();
 		}
 
 		void context_command(uint32_t index, metadb_handle_list_cref handles, const GUID& caller) override
@@ -55,7 +59,7 @@ namespace cinfo
 
 		void get_item_name(uint32_t index, pfc::string_base& out) override
 		{
-			out = command_names[index];
+			out = context_items[index].name;
 		}
 	};
 
