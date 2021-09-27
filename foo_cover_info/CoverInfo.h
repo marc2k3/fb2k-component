@@ -17,7 +17,7 @@ namespace cinfo
 			}
 
 			const uint32_t count = m_handles.get_count();
-			uint32_t counter = 0, found = 0;
+			uint32_t files = 0, found = 0;
 			hash_list to_refresh;
 			hash_set hashes;
 
@@ -58,14 +58,14 @@ namespace cinfo
 
 					set(hash, f);
 					to_refresh += hash;
-					counter++;
+					files++;
 				}
 			}
 
 			refresh(to_refresh);
 
 			FB2K_console_formatter() << "Cover Info: " << count << " items scanned.";
-			FB2K_console_formatter() << "Cover Info: " << counter << " files are capable of containing covers.";
+			FB2K_console_formatter() << "Cover Info: " << files << " files are capable of containing covers.";
 			FB2K_console_formatter() << "Cover Info: " << found << " files have covers.";
 		}
 
