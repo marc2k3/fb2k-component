@@ -9,18 +9,11 @@ namespace resizer
 		L"PNG"
 	};
 
-	namespace defaults
-	{
-		static constexpr int type = 0;
-		static constexpr int format = 0;
-		static constexpr int size = 500;
-	}
-
 	namespace prefs
 	{
-		static cfg_int type(guid_type, defaults::type);
-		static cfg_int format(guid_format, defaults::format);
-		static cfg_int size(guid_size, defaults::size);
+		static cfg_int type(guid_cfg_type, 0);
+		static cfg_int format(guid_cfg_format, 0);
+		static cfg_int size(guid_cfg_size, 500);
 
 		static GUID get_guid()
 		{
