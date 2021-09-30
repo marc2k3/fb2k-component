@@ -44,7 +44,7 @@ public:
 
 		if (index == 0)
 		{
-			if (popup(hwnd))
+			if (choose_settings(hwnd))
 			{
 				auto cb = fb2k::service_new<CoverResizer>(handles);
 				threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Resizing covers...");
@@ -56,43 +56,43 @@ public:
 			std::string folder(pfc::string_directory(handles[0]->get_path()));
 			std::unique_ptr<Gdiplus::Image> image;
 
-			if (browse_for_image(hwnd, folder, info, image) && popup(hwnd))
+			if (!browse_for_image(hwnd, folder, info, image)) return;
+			if (!choose_settings(hwnd)) return;
+	
+			const int format = prefs::format.get_value();
+			MimeCLSID clsid{};
+			if (format == 0) clsid = CoverResizer::get_clsid(info.mime);
+			else if (format == 1) clsid = CoverResizer::get_clsid(mime_jpeg);
+			else if (format == 2) clsid = CoverResizer::get_clsid(mime_png);
+
+			if (clsid.has_value())
 			{
-				const int format = prefs::format.get_value();
-				MimeCLSID clsid{};
-				if (format == 0) clsid = CoverResizer::get_clsid(info.mime);
-				else if (format == 1) clsid = CoverResizer::get_clsid(mime_jpeg);
-				else if (format == 2) clsid = CoverResizer::get_clsid(mime_png);
+				pfc::com_ptr_t<IStream> stream;
+				if (FAILED(CreateStreamOnHGlobal(nullptr, TRUE, stream.receive_ptr()))) return;
 
-				if (clsid.has_value())
+				const double dmax = static_cast<double>(prefs::size.get_value());
+				std::unique_ptr<Gdiplus::Bitmap> resized;
+				if (CoverResizer::resize(dmax, image, resized)) // returns false if image is already smaller than specified max size
 				{
-					pfc::com_ptr_t<IStream> stream;
-					if (FAILED(CreateStreamOnHGlobal(nullptr, TRUE, stream.receive_ptr()))) return;
-
-					const double dmax = static_cast<double>(prefs::size.get_value());
-					std::unique_ptr<Gdiplus::Bitmap> resized;
-					if (CoverResizer::resize(dmax, image, resized)) // returns false if image is already smaller than specified max size
-					{
-						if (resized->GetLastStatus() != Gdiplus::Ok) return;
-						if (resized->Save(stream.get_ptr(), &clsid.value()) != Gdiplus::Ok) return;
-					}
-					else
-					{
-						if (image->Save(stream.get_ptr(), &clsid.value()) != Gdiplus::Ok) return;
-					}
-
-					album_art_data_ptr data = CoverResizer::istream_to_data(stream.get_ptr());
-
-					if (data.is_valid())
-					{
-						auto cb = fb2k::service_new<CoverAttach>(handles, data);
-						threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Attaching cover...");
-					}
+					if (resized->GetLastStatus() != Gdiplus::Ok) return;
+					if (resized->Save(stream.get_ptr(), &clsid.value()) != Gdiplus::Ok) return;
 				}
 				else
 				{
-					popup_message::g_show("Cannot attach image due to invalid type.", group_resize);
+					if (image->Save(stream.get_ptr(), &clsid.value()) != Gdiplus::Ok) return;
 				}
+
+				album_art_data_ptr data = CoverResizer::istream_to_data(stream.get_ptr());
+
+				if (data.is_valid())
+				{
+					auto cb = fb2k::service_new<CoverAttach>(handles, data);
+					threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Attaching cover...");
+				}
+			}
+			else
+			{
+				popup_message::g_show("Cannot attach image due to invalid type.", group_resize);
 			}
 		}
 	}
@@ -143,13 +143,13 @@ private:
 		return false;
 	}
 
-	bool popup(HWND parent)
+	bool choose_settings(HWND parent)
 	{
 		modal_dialog_scope scope;
 		if (scope.can_create())
 		{
 			scope.initialize(parent);
-			PopupDialog dlg;
+			CDialogSettings dlg;
 			return dlg.DoModal(parent) == IDOK;
 		}
 		return false;

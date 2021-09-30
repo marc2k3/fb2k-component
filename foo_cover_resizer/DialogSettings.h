@@ -21,10 +21,10 @@ namespace resizer
 		}
 	}
 
-	class PopupDialog : public CDialogImpl<PopupDialog>
+	class CDialogSettings : public CDialogImpl<CDialogSettings>
 	{
 	public:
-		BEGIN_MSG_MAP_EX(PopupDialog)
+		BEGIN_MSG_MAP_EX(CDialogSettings)
 			MSG_WM_INITDIALOG(OnInitDialog)
 			COMMAND_RANGE_HANDLER_EX(IDOK, IDCANCEL, OnCloseCmd)
 			COMMAND_CODE_HANDLER_EX(EN_UPDATE, OnUpdate)

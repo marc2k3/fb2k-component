@@ -105,7 +105,7 @@
     <ClInclude Include="CoverAttach.h" />
     <ClInclude Include="CoverRemover.h" />
     <ClInclude Include="CoverResizer.h" />
-    <ClInclude Include="PopupDialog.h" />
+    <ClInclude Include="DialogSettings.h" />
     <ClInclude Include="foo_cover_resizer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />

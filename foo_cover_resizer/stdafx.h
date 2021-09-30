@@ -24,7 +24,7 @@ using namespace pfc::stringcvt;
 using MimeCLSID = std::optional<CLSID>;
 
 #include "foo_cover_resizer.h"
-#include "PopupDialog.h"
+#include "DialogSettings.h"
 #include "CoverAttach.h"
 #include "CoverRemover.h"
 #include "CoverResizer.h"
