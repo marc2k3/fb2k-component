@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by foo_musicbrainz.rc
+// Used by foo_cover_resizer.rc
 //
 
 #ifndef IDC_STATIC
