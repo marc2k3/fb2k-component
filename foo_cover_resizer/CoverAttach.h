@@ -8,7 +8,7 @@ public:
 	void run(threaded_process_status& status, abort_callback& abort) override
 	{
 		auto api = file_lock_manager::get();
-		const GUID what = resizer::prefs::get_guid();
+		const GUID what = resizer::settings::get_guid();
 		const uint32_t count = m_handles.get_count();
 		std::set<pfc::string8> paths;
 

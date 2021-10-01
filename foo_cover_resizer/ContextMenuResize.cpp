@@ -59,7 +59,7 @@ public:
 			if (!browse_for_image(hwnd, folder, info, image)) return;
 			if (!choose_settings(hwnd)) return;
 	
-			const int format = prefs::format.get_value();
+			const int format = settings::format.get_value();
 			MimeCLSID clsid{};
 			if (format == 0) clsid = CoverResizer::get_clsid(info.mime);
 			else if (format == 1) clsid = CoverResizer::get_clsid(mime_jpeg);
@@ -70,7 +70,7 @@ public:
 				pfc::com_ptr_t<IStream> stream;
 				if (FAILED(CreateStreamOnHGlobal(nullptr, TRUE, stream.receive_ptr()))) return;
 
-				const double dmax = static_cast<double>(prefs::size.get_value());
+				const double dmax = static_cast<double>(settings::size.get_value());
 				std::unique_ptr<Gdiplus::Bitmap> resized;
 				if (CoverResizer::resize(dmax, image, resized)) // returns false if image is already smaller than specified max size
 				{

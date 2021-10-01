@@ -84,10 +84,10 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 	album_art_extractor::ptr extractor_ptr;
 	auto lock_api = file_lock_manager::get();
 
-	const GUID what = m_convert_only ? album_art_ids::cover_front : prefs::get_guid();
+	const GUID what = m_convert_only ? album_art_ids::cover_front : settings::get_guid();
 	const uint32_t count = m_handles.get_count();
-	const double dmax = static_cast<double>(prefs::size.get_value());
-	const int format = prefs::format.get_value();
+	const double dmax = static_cast<double>(settings::size.get_value());
+	const int format = settings::format.get_value();
 	std::set<pfc::string8> paths;
 	uint32_t success = 0;
 

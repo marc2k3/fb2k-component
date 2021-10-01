@@ -7,7 +7,7 @@
 #define IDC_STATIC -1
 #endif
 
-#define IDD_DIALOG 100
+#define IDD_DIALOG_SETTINGS 100
 #define IDC_COMBO_TYPE 101
 #define IDC_COMBO_FORMAT 102
 #define IDC_EDIT_SIZE 103

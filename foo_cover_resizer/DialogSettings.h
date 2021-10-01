@@ -9,7 +9,7 @@ namespace resizer
 		L"PNG"
 	};
 
-	namespace prefs
+	namespace settings
 	{
 		static cfg_int type(guid_cfg_type, 0);
 		static cfg_int format(guid_cfg_format, 0);
@@ -30,7 +30,7 @@ namespace resizer
 			COMMAND_CODE_HANDLER_EX(EN_UPDATE, OnUpdate)
 		END_MSG_MAP()
 
-		enum { IDD = IDD_DIALOG };
+		enum { IDD = IDD_DIALOG_SETTINGS };
 
 		BOOL OnInitDialog(CWindow, LPARAM)
 		{
@@ -49,9 +49,9 @@ namespace resizer
 				m_combo_format.AddString(format);
 			}
 
-			m_combo_type.SetCurSel(prefs::type.get_value());
-			m_combo_format.SetCurSel(prefs::format.get_value());
-			pfc::setWindowText(m_edit_size, std::to_string(prefs::size.get_value()).c_str());
+			m_combo_type.SetCurSel(settings::type.get_value());
+			m_combo_format.SetCurSel(settings::format.get_value());
+			pfc::setWindowText(m_edit_size, std::to_string(settings::size.get_value()).c_str());
 
 			CenterWindow();
 			return TRUE;
@@ -68,9 +68,9 @@ namespace resizer
 		{
 			if (nID == IDOK)
 			{
-				prefs::type = m_combo_type.GetCurSel();
-				prefs::format = m_combo_format.GetCurSel();
-				prefs::size = GetSize();
+				settings::type = m_combo_type.GetCurSel();
+				settings::format = m_combo_format.GetCurSel();
+				settings::size = GetSize();
 			}
 
 			EndDialog(nID);
