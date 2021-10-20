@@ -1,14 +1,6 @@
-## Minimum requirements
+## Requirements & Download
 
-`Windows 7` or later, `foobar2000` `v1.6` or later. 
-
-## Installation
-
-https://wiki.hydrogenaud.io/index.php?title=Foobar2000:How_to_install_a_component
-
-## Download
-
-https://github.com/marc2k3/fb2k-component/releases
+https://github.com/marc2k3/fb2k-component/releases/latest
 
 # foo_run_main
 
