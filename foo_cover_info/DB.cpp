@@ -16,8 +16,7 @@ namespace cinfo
 	public:
 		metadb_index_hash transform(const file_info& info, const playable_location& location) override
 		{
-			const char* str = file_path_display(location.get_path());
-			return hasher_md5::get()->process_single_string(str).xorHalve();
+			return generate_hash(location.get_path());
 		}
 	};
 
@@ -102,6 +101,48 @@ namespace cinfo
 		}
 	};
 
+	class FileOperationCallback : public file_operation_callback
+	{
+	public:
+		using PathList = const pfc::list_base_const_t<const char*>&;
+
+		void on_files_copied_sorted(PathList from, PathList to) override
+		{
+			update(from, to, false);
+		}
+
+		void on_files_deleted_sorted(PathList) override {}
+
+		void on_files_moved_sorted(PathList from, PathList to) override
+		{
+			update(from, to, true);
+		}
+
+	private:
+		void update(PathList from, PathList to, bool clear_old)
+		{
+			hash_list to_refresh;
+			const uint32_t count = from.get_count();
+
+			for (const uint32_t i : std::views::iota(0U, count))
+			{
+				metadb_index_hash old_hash = generate_hash(from[i]);
+				metadb_index_hash new_hash = generate_hash(to[i]);
+				set(new_hash, get(old_hash));
+				to_refresh += new_hash;
+
+				if (clear_old)
+				{
+					set(old_hash, Fields());
+					to_refresh += old_hash;
+				}
+			}
+
+			refresh(to_refresh);
+		}
+	};
+
+	FB2K_SERVICE_FACTORY(FileOperationCallback);
 	FB2K_SERVICE_FACTORY(InitStageCallback);
 	FB2K_SERVICE_FACTORY(InitQuit);
 	FB2K_SERVICE_FACTORY(MetadbDisplayFieldProvider);
@@ -130,6 +171,11 @@ namespace cinfo
 	bool hashHandle(const metadb_handle_ptr& handle, metadb_index_hash& hash)
 	{
 		return g_client->hashHandle(handle, hash);
+	}
+
+	metadb_index_hash generate_hash(file_path_display path)
+	{
+		return hasher_md5::get()->process_single_string(path).xorHalve();
 	}
 
 	metadb_index_manager::ptr theAPI()
