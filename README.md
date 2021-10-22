@@ -6,7 +6,7 @@ https://github.com/marc2k3/fb2k-component/releases/latest
 
 Unlike the built in command line handler/`foo_runcmd`, this component has full support for dynamically generated menu commands meaning you can use `Edit` commands and switch playlists, change output devices etc.
 
-You must supply the full path to the command. Examples:
+To avoid ambiguity with common names that might appeaar more than once under different sub menus, you must supply the full path to the command. Examples:
 
 ```
 foobar2000.exe /run_main:Edit/Sort/Randomize
@@ -36,7 +36,7 @@ Because it's not possible to query files for embedded album art within foobar200
 %front_cover_bytes% (raw image size)
 ```
 
-Note that database records are attached to the `%path%` of each file so if files are renamed or moved, associated data will be orphaned and the files will need re-scanning. Like `foo_playcount`, database records have a lifetime of 4 weeks if they are not included in the `Media Library` or playlist.
+Note that database records are attached to the `%path%` of each file. As of `v0.1.1`, records are now preserved if files are renamed/moved with [File operations](https://wiki.hydrogenaud.io/index.php?title=Foobar2000:File_operations). If files are renamed externally, database records would be orphaned and the files would need scanning again. Like `foo_playcount`, database records have a lifetime of 4 weeks if they are not included in the `Media Library` or playlist.
 
 Use the right click menu on any library/playlist selection to scan or clear existing info.
 
