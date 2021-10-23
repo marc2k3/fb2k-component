@@ -22,21 +22,20 @@ public:
 			status.set_item_path(path);
 
 			album_art_editor::ptr ptr;
-			if (album_art_editor::g_get_interface(ptr, path))
-			{
-				try
-				{
-					auto lock = api->acquire_write(path, abort);
-					album_art_editor_instance_ptr aaep = ptr->open(nullptr, path, abort);
+			if (!album_art_editor::g_get_interface(ptr, path)) continue;
 
-					aaep->remove(album_art_ids::artist);
-					aaep->remove(album_art_ids::cover_back);
-					aaep->remove(album_art_ids::disc);
-					aaep->remove(album_art_ids::icon);
-					aaep->commit(abort);
-				}
-				catch (...) {}
+			try
+			{
+				auto lock = api->acquire_write(path, abort);
+				album_art_editor_instance_ptr aaep = ptr->open(nullptr, path, abort);
+
+				aaep->remove(album_art_ids::artist);
+				aaep->remove(album_art_ids::cover_back);
+				aaep->remove(album_art_ids::disc);
+				aaep->remove(album_art_ids::icon);
+				aaep->commit(abort);
 			}
+			catch (...) {}
 		}
 	}
 

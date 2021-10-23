@@ -49,7 +49,8 @@ namespace cinfo
 			if (index == 0)
 			{
 				auto cb = fb2k::service_new<CoverInfo>(handles);
-				threaded_process::get()->run_modeless(cb, threaded_process_flags, core_api::get_main_window(), "Scanning for covers...");
+				static constexpr uint32_t flags = threaded_process::flag_show_progress | threaded_process::flag_show_delayed | threaded_process::flag_show_item | threaded_process::flag_show_abort;
+				threaded_process::get()->run_modeless(cb, flags, core_api::get_main_window(), "Scanning for covers...");
 			}
 			else if (index == 1)
 			{

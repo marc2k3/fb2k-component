@@ -121,7 +121,7 @@ namespace cinfo
 	private:
 		void update(PathList from, PathList to, bool clear_old)
 		{
-			hash_list to_refresh;
+			HashList to_refresh;
 			const uint32_t count = from.get_count();
 
 			for (const uint32_t i : std::views::iota(0U, count))
@@ -184,7 +184,7 @@ namespace cinfo
 		return metadb_index_manager::get();
 	}
 
-	void refresh(const hash_list& hashes)
+	void refresh(const HashList& hashes)
 	{
 		fb2k::inMainThread([hashes]
 			{
@@ -194,8 +194,8 @@ namespace cinfo
 
 	void reset(metadb_handle_list_cref handles)
 	{
-		hash_list to_refresh;
-		hash_set hashes;
+		HashList to_refresh;
+		HashSet hashes;
 
 		const uint32_t count = handles.get_count();
 		for (const uint32_t i : std::views::iota(0U, count))

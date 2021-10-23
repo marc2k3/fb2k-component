@@ -115,11 +115,11 @@ private:
 		pfc::string8 path;
 		if (uGetOpenFileName(parent, "Picture files|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.tiff;*.webp", 0, nullptr, "Browse for image", folder.starts_with("file://") ? folder.c_str() : nullptr, path, FALSE) == FALSE) return false;
 
-		std::wstring wpath = string_wide_from_utf8_fast(path).get_ptr();
+		auto wpath = string_wide_from_utf8_fast(path);
 		pfc::com_ptr_t<IStream> stream;
 		STATSTG sts;
 
-		if (FAILED(SHCreateStreamOnFileEx(wpath.data(), STGM_READ | STGM_SHARE_DENY_WRITE, GENERIC_READ, FALSE, nullptr, stream.receive_ptr()))) return false;
+		if (FAILED(SHCreateStreamOnFileEx(wpath, STGM_READ | STGM_SHARE_DENY_WRITE, GENERIC_READ, FALSE, nullptr, stream.receive_ptr()))) return false;
 		if (FAILED(stream->Stat(&sts, STATFLAG_DEFAULT))) return false;
 
 		const DWORD bytes = sts.cbSize.LowPart;

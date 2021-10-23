@@ -18,8 +18,8 @@ namespace cinfo
 
 			const uint32_t count = m_handles.get_count();
 			uint32_t files = 0, found = 0;
-			hash_list to_refresh;
-			hash_set hashes;
+			HashList to_refresh;
+			HashSet hashes;
 
 			for (const uint32_t i : std::views::iota(0U, count))
 			{
@@ -36,30 +36,29 @@ namespace cinfo
 				if (!hashes.emplace(hash).second) continue;
 
 				album_art_extractor::ptr ptr;
-				if (album_art_extractor::g_get_interface(ptr, path))
+				if (!album_art_extractor::g_get_interface(ptr, path)) continue;
+
+				Fields f;
+
+				try
 				{
-					Fields f;
+					album_art_data_ptr data = ptr->open(nullptr, path, abort)->query(album_art_ids::cover_front, abort);
 
-					try
+					if (data.is_valid())
 					{
-						album_art_data_ptr data = ptr->open(nullptr, path, abort)->query(album_art_ids::cover_front, abort);
-
-						if (data.is_valid())
-						{
-							fb2k::imageInfo_t info = image_api->getInfo(data);
-							f.front_cover_width = info.width;
-							f.front_cover_height = info.height;
-							f.front_cover_bytes = data->get_size();
-							if (info.formatName) f.front_cover_format = info.formatName;
-							found++;
-						}
+						fb2k::imageInfo_t info = image_api->getInfo(data);
+						f.front_cover_width = info.width;
+						f.front_cover_height = info.height;
+						f.front_cover_bytes = data->get_size();
+						if (info.formatName) f.front_cover_format = info.formatName;
+						found++;
 					}
-					catch (...) {}
-
-					set(hash, f);
-					to_refresh += hash;
-					files++;
 				}
+				catch (...) {}
+
+				set(hash, f);
+				to_refresh += hash;
+				files++;
 			}
 
 			refresh(to_refresh);

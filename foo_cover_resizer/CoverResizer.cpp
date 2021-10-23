@@ -22,7 +22,7 @@ MimeCLSID CoverResizer::get_clsid(const std::string& str)
 		}
 	}
 
-	const auto& it = s_encoder_map.find(str);
+	const auto it = s_encoder_map.find(str);
 	if (it != s_encoder_map.end())
 	{
 		return it->second;
