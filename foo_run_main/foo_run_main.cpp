@@ -17,13 +17,10 @@ namespace
 
 	VALIDATE_COMPONENT_FILENAME("foo_run_main.dll");
 
-	using pfc::string8;
-	using pfc::stringp;
-
 	class MainMenuCommand
 	{
 	public:
-		MainMenuCommand(stringp command) : m_command(command)
+		MainMenuCommand(const char* command) : m_command(command)
 		{
 			if (s_group_guid_map.empty())
 			{
@@ -46,7 +43,7 @@ namespace
 				mainmenu_commands_v2::ptr v2_ptr;
 				ptr->cast(v2_ptr);
 
-				const string8 parent_path = build_parent_path(ptr->get_parent());
+				const pfc::string8 parent_path = build_parent_path(ptr->get_parent());
 				const uint32_t count = ptr->get_command_count();
 
 				for (const uint32_t i : std::views::iota(0U, count))
@@ -61,10 +58,10 @@ namespace
 					}
 					else
 					{
-						string8 name;
+						pfc::string8 name;
 						ptr->get_name(i, name);
 
-						string8 path = parent_path;
+						pfc::string8 path = parent_path;
 						path.add_string(name);
 						if (match_command(path))
 						{
@@ -78,13 +75,13 @@ namespace
 		}
 
 	private:
-		bool execute_recur(mainmenu_node::ptr node, stringp parent_path)
+		bool execute_recur(mainmenu_node::ptr node, const char* parent_path)
 		{
-			string8 text;
+			pfc::string8 text;
 			uint32_t flags;
 			node->get_display(text, flags);
 
-			string8 path = parent_path.get_ptr();
+			pfc::string8 path = parent_path;
 			path.add_string(text);
 
 			switch (node->get_type())
@@ -115,14 +112,14 @@ namespace
 			return false;
 		}
 
-		bool match_command(stringp what)
+		bool match_command(const char* what)
 		{
 			return _stricmp(m_command, what) == 0;
 		}
 
-		string8 build_parent_path(GUID parent)
+		pfc::string8 build_parent_path(GUID parent)
 		{
-			string8 path;
+			pfc::string8 path;
 			while (parent != pfc::guid_null)
 			{
 				mainmenu_group::ptr group_ptr = s_group_guid_map.at(hash_guid(parent));
@@ -130,7 +127,7 @@ namespace
 
 				if (group_ptr->cast(group_popup_ptr))
 				{
-					string8 str;
+					pfc::string8 str;
 					group_popup_ptr->get_display_string(str);
 					str.add_char('/');
 					str.add_string(path);
@@ -147,7 +144,7 @@ namespace
 		}
 
 		inline static std::unordered_map<uint64_t, mainmenu_group::ptr> s_group_guid_map;
-		string8 m_command;
+		pfc::string8 m_command;
 	};
 
 	class CommandLineHandler : public commandline_handler
@@ -155,11 +152,11 @@ namespace
 	public:
 		result on_token(const char* token) override
 		{
-			pfc::string s(token);
+			pfc::string8 s = token;
 
 			if (s.startsWith("/run_main:"))
 			{
-				string8 command = s.subString(10).get_ptr();
+				pfc::string8 command = s.subString(10);
 				if (!MainMenuCommand(command).execute())
 				{
 					FB2K_console_formatter() << component_name << ": Command not found: " << command;

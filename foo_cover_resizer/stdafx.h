@@ -9,6 +9,7 @@
 #include <optional>
 #include <ranges>
 #include <set>
+#include <string>
 
 #include "resource.h"
 #include <foobar2000/SDK/foobar2000.h>

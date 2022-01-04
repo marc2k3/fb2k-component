@@ -4,7 +4,7 @@ using namespace resizer;
 
 CoverResizer::CoverResizer(metadb_handle_list_cref handles, bool convert_only) : m_handles(handles), m_convert_only(convert_only) {}
 
-MimeCLSID CoverResizer::get_clsid(const std::string& str)
+MimeCLSID CoverResizer::get_clsid(const char* str)
 {
 	if (s_encoder_map.empty())
 	{
