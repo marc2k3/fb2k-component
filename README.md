@@ -6,7 +6,7 @@ https://github.com/marc2k3/fb2k-component/releases/latest
 
 Unlike the built in command line handler/`foo_runcmd`, this component has full support for dynamically generated menu commands meaning you can use `Edit` commands and switch playlists, change output devices etc.
 
-To avoid ambiguity with common names that might appeaar more than once under different sub menus, you must supply the full path to the command. Examples:
+To avoid ambiguity with common names that might appear more than once under different sub menus, you must supply the full path to the command. Examples:
 
 ```
 foobar2000.exe /run_main:Edit/Sort/Randomize
