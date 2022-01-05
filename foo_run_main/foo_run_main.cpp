@@ -168,10 +168,13 @@ namespace
 
 				return RESULT_PROCESSED;
 			}
-			else if (s.startsWith("/select_item:"))
+			else if (s.startsWith("/select_item:") || s.startsWith("/select_item_and_play:"))
 			{
+				const size_t pos = s.find_first(':');
+				const bool play = pos == 21;
 				bool index_ok = false;
-				pfc::string8 index = s.subString(13);
+
+				pfc::string8 index = s.subString(pos + 1);
 				if (pfc::string_is_numeric(index))
 				{
 					auto api = playlist_manager::get();
@@ -182,6 +185,10 @@ namespace
 						api->playlist_clear_selection(playlistIndex);
 						api->playlist_set_selection_single(playlistIndex, playlistItemIndex, true);
 						api->playlist_set_focus_item(playlistIndex, playlistItemIndex);
+						if (play)
+						{
+							api->playlist_execute_default_action(playlistIndex, playlistItemIndex);
+						}
 						index_ok = true;
 					}
 				}
