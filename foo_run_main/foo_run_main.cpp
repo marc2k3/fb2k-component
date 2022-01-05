@@ -2,7 +2,11 @@
 #define WINVER _WIN32_WINNT_WIN7
 
 #include <ranges>
+#include <string>
 #include <foobar2000/SDK/foobar2000.h>
+#include <Shlwapi.h>
+
+#pragma comment(lib, "Shlwapi.lib")
 
 namespace
 {
@@ -164,7 +168,27 @@ namespace
 
 				return RESULT_PROCESSED;
 			}
+			else if (s.startsWith("/select_item:"))
+			{
+				bool index_ok = false;
+				pfc::string8 index = s.subString(13);
+				if (pfc::string_is_numeric(index))
+				{
+					auto api = playlist_manager::get();
+					const uint32_t playlistIndex = api->get_active_playlist();
+					const uint32_t playlistItemIndex = std::stoul(index.get_ptr()) - 1;
+					if (playlistIndex < api->get_playlist_count() && playlistItemIndex < api->playlist_get_item_count(playlistIndex))
+					{
+						api->playlist_clear_selection(playlistIndex);
+						api->playlist_set_selection_single(playlistIndex, playlistItemIndex, true);
+						api->playlist_set_focus_item(playlistIndex, playlistItemIndex);
+						index_ok = true;
+					}
+				}
+				if (!index_ok) FB2K_console_formatter() << component_name << ": Invalid index";
 
+				return RESULT_PROCESSED;
+			}
 			return RESULT_NOT_OURS;
 		}
 	};
