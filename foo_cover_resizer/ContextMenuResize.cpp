@@ -53,7 +53,7 @@ public:
 		else if (index == 1)
 		{
 			fb2k::imageInfo_t info;
-			std::string folder(pfc::string_directory(handles[0]->get_path()));
+			pfc::string8 folder = pfc::string_directory(handles[0]->get_path());
 			std::unique_ptr<Gdiplus::Image> image;
 
 			if (!browse_for_image(hwnd, folder, info, image)) return;
@@ -103,7 +103,7 @@ public:
 	}
 
 private:
-	bool browse_for_image(HWND parent, const std::string& folder, fb2k::imageInfo_t& info, std::unique_ptr<Gdiplus::Image>& out)
+	bool browse_for_image(HWND parent, const char* folder, fb2k::imageInfo_t& info, std::unique_ptr<Gdiplus::Image>& out)
 	{
 		auto image_api = fb2k::imageLoaderLite::tryGet();
 		if (image_api.is_empty())
@@ -113,7 +113,7 @@ private:
 		}
 
 		pfc::string8 path;
-		if (uGetOpenFileName(parent, "Picture files|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.tiff;*.webp", 0, nullptr, "Browse for image", folder.starts_with("file://") ? folder.c_str() : nullptr, path, FALSE) == FALSE) return false;
+		if (uGetOpenFileName(parent, "Picture files|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.tiff;*.webp", 0, nullptr, "Browse for image", folder, path, FALSE) == FALSE) return false;
 
 		auto wpath = string_wide_from_utf8_fast(path);
 		pfc::com_ptr_t<IStream> stream;
