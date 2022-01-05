@@ -1,6 +1,7 @@
 #define _WIN32_WINNT _WIN32_WINNT_WIN7
 #define WINVER _WIN32_WINNT_WIN7
 
+#include <algorithm>
 #include <ranges>
 #include <string>
 #include <foobar2000/SDK/foobar2000.h>
@@ -179,17 +180,21 @@ namespace
 				{
 					auto api = playlist_manager::get();
 					const uint32_t playlistIndex = api->get_active_playlist();
-					const uint32_t playlistItemIndex = std::stoul(index.get_ptr()) - 1;
-					if (playlistIndex < api->get_playlist_count() && playlistItemIndex < api->playlist_get_item_count(playlistIndex))
+					if (playlistIndex < api->get_playlist_count())
 					{
-						api->playlist_clear_selection(playlistIndex);
-						api->playlist_set_selection_single(playlistIndex, playlistItemIndex, true);
-						api->playlist_set_focus_item(playlistIndex, playlistItemIndex);
-						if (play)
+						const uint32_t count = api->playlist_get_item_count(playlistIndex);
+						if (count > 0)
 						{
-							api->playlist_execute_default_action(playlistIndex, playlistItemIndex);
+							const uint32_t playlistItemIndex = std::clamp<uint32_t>(std::stoul(index.get_ptr()), 1, count) - 1;
+							api->playlist_clear_selection(playlistIndex);
+							api->playlist_set_selection_single(playlistIndex, playlistItemIndex, true);
+							api->playlist_set_focus_item(playlistIndex, playlistItemIndex);
+							if (play)
+							{
+								api->playlist_execute_default_action(playlistIndex, playlistItemIndex);
+							}
+							index_ok = true;
 						}
-						index_ok = true;
 					}
 				}
 				if (!index_ok) FB2K_console_formatter() << component_name << ": Invalid index";
