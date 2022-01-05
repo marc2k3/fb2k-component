@@ -26,6 +26,8 @@ foobar2000.exe /select_item:5
 foobar2000.exe /play
 ```
 
+Note that this example would require that the `Playback/Playback follows cursor` menu item is enabled.
+
 # foo_cover_info
 
 ### Breaking changes in component version `v0.1.0` released on `07/04/2021`.
