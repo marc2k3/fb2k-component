@@ -16,6 +16,16 @@ foobar2000.exe /run_main:Library/Search
 foobar2000.exe /run_main:"Playback/Device/Primary Sound Driver"
 ```
 
+As of `v0.0.2`, there is a new `/select_item` option so you can select a track from the active playlist.
+
+It means you can do something like this:
+
+```
+foobar2000.exe /run_main:"View/Switch to playlist/stranger in the alps"
+foobar2000.exe /select_item:5
+foobar2000.exe /play
+```
+
 # foo_cover_info
 
 ### Breaking changes in component version `v0.1.0` released on `07/04/2021`.
