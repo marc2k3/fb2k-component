@@ -28,6 +28,14 @@ foobar2000.exe /play
 
 Note that this example would require that the `Playback/Playback follows cursor` menu item is enabled.
 
+`v0.0.3` addresses the issue by adding `/select_item_and_play`.
+
+```
+foobar2000.exe /select_item_and_play:5
+```
+
+Also, valid numbers are now clamped so anything in excess of the actual playlist item count will result in the last track being selected.
+
 # foo_cover_info
 
 ### Breaking changes in component version `v0.1.0` released on `07/04/2021`.
