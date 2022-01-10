@@ -34,7 +34,7 @@ namespace
 				for (auto e = service_enum_t<mainmenu_group>(); !e.finished(); ++e)
 				{
 					auto ptr = *e;
-					s_group_guid_map.emplace(hash_guid(ptr->get_guid()), ptr);
+					s_group_guid_map.emplace(ptr->get_guid(), ptr);
 				}
 			}
 		}
@@ -82,6 +82,14 @@ namespace
 		}
 
 	private:
+		struct GuidHasher
+		{
+			uint64_t operator()(const GUID& g) const
+			{
+				return hasher_md5::get()->process_single_string(pfc::print_guid(g)).xorHalve();
+			}
+		};
+
 		bool execute_recur(mainmenu_node::ptr node, const char* parent_path)
 		{
 			pfc::string8 text;
@@ -95,8 +103,8 @@ namespace
 			{
 			case mainmenu_node::type_group:
 				{
-					const uint32_t count = node->get_children_count();
 					path.end_with('/');
+					const uint32_t count = node->get_children_count();
 
 					for (const uint32_t i : std::views::iota(0U, count))
 					{
@@ -129,7 +137,7 @@ namespace
 			pfc::string8 path;
 			while (parent != pfc::guid_null)
 			{
-				mainmenu_group::ptr group_ptr = s_group_guid_map.at(hash_guid(parent));
+				mainmenu_group::ptr group_ptr = s_group_guid_map.at(parent);
 				mainmenu_group_popup::ptr group_popup_ptr;
 
 				if (group_ptr->cast(group_popup_ptr))
@@ -145,12 +153,7 @@ namespace
 			return path;
 		};
 
-		uint64_t hash_guid(const GUID& g)
-		{
-			return hasher_md5::get()->process_single_string(pfc::print_guid(g)).xorHalve();
-		}
-
-		inline static std::unordered_map<uint64_t, mainmenu_group::ptr> s_group_guid_map;
+		inline static std::unordered_map<GUID, mainmenu_group::ptr, GuidHasher> s_group_guid_map;
 		pfc::string8 m_command;
 	};
 
