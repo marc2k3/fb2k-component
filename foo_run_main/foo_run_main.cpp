@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <ranges>
 #include <string>
+#include <thread>
+
 #include <foobar2000/SDK/foobar2000.h>
 #include <Shlwapi.h>
 
@@ -15,7 +17,7 @@ namespace
 
 	DECLARE_COMPONENT_VERSION(
 		component_name,
-		"0.0.3",
+		"0.0.4",
 		"Copyright (C) 2022 marc2003\n\n"
 		"Build: " __TIME__ ", " __DATE__
 	);
@@ -171,37 +173,69 @@ namespace
 			}
 			else if (s.startsWith("/select_item:") || s.startsWith("/select_item_and_play:"))
 			{
-				const size_t pos = s.find_first(':');
-				const bool play = pos == 21;
-				bool index_ok = false;
+				const uint32_t first_colon = s.find_first(':');
+				const uint32_t second_colon = s.find_last(':');
+				const bool play = first_colon == 21;
 
-				pfc::string8 index = s.subString(pos + 1);
-				if (pfc::string_is_numeric(index))
+				pfc::string8 item_text = s.subString(first_colon + 1, second_colon - first_colon - 1);
+				if (pfc::string_is_numeric(item_text))
 				{
-					auto api = playlist_manager::get();
-					const uint32_t playlistIndex = api->get_active_playlist();
-					if (playlistIndex < api->get_playlist_count())
+					const uint32_t item_num = std::stoul(item_text.get_ptr());
+					uint32_t delay_num = 0;
+
+					if (second_colon < SIZE_MAX && second_colon != first_colon)
 					{
-						const uint32_t count = api->playlist_get_item_count(playlistIndex);
-						if (count > 0)
+						pfc::string8 delay_text = s.subString(second_colon + 1);
+						if (pfc::string_is_numeric(delay_text))
 						{
-							const uint32_t playlistItemIndex = std::clamp<uint32_t>(std::stoul(index.get_ptr()), 1, count) - 1;
-							api->playlist_clear_selection(playlistIndex);
-							api->playlist_set_selection_single(playlistIndex, playlistItemIndex, true);
-							api->playlist_set_focus_item(playlistIndex, playlistItemIndex);
-							if (play)
-							{
-								api->playlist_execute_default_action(playlistIndex, playlistItemIndex);
-							}
-							index_ok = true;
+							delay_num = std::stoul(delay_text.get_ptr());
 						}
 					}
+					
+					if (delay_num == 0)
+					{
+						select_item(item_num, play);
+					}
+					else
+					{
+						auto t = std::thread([=]()
+							{
+								std::this_thread::sleep_for(std::chrono::milliseconds(delay_num));
+								fb2k::inMainThread([=]()
+									{
+										select_item(item_num, play);
+									});
+							});
+
+						t.detach();
+					}
 				}
-				if (!index_ok) FB2K_console_formatter() << component_name << ": Invalid index";
 
 				return RESULT_PROCESSED;
 			}
 			return RESULT_NOT_OURS;
+		}
+
+	private:
+		void select_item(uint32_t item_num, bool play)
+		{
+			auto api = playlist_manager::get();
+			const uint32_t playlistIndex = api->get_active_playlist();
+			if (playlistIndex < api->get_playlist_count())
+			{
+				const uint32_t count = api->playlist_get_item_count(playlistIndex);
+				if (count > 0)
+				{
+					const uint32_t playlistItemIndex = std::clamp<uint32_t>(item_num, 1, count) - 1;
+					api->playlist_clear_selection(playlistIndex);
+					api->playlist_set_selection_single(playlistIndex, playlistItemIndex, true);
+					api->playlist_set_focus_item(playlistIndex, playlistItemIndex);
+					if (play)
+					{
+						api->playlist_execute_default_action(playlistIndex, playlistItemIndex);
+					}
+				}
+			}
 		}
 	};
 

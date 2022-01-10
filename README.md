@@ -16,25 +16,29 @@ foobar2000.exe /run_main:Library/Search
 foobar2000.exe /run_main:"Playback/Device/Primary Sound Driver"
 ```
 
-As of `v0.0.2`, there is a new `/select_item` option so you can select a track from the active playlist.
+The latest version adds 2 additonal commands, `/select_item` and `/select_item_and_play`.
 
-It means you can do something like this:
+Note that this example requires `Playback follows cursor` to be enabled.
 
 ```
-foobar2000.exe /run_main:"View/Switch to playlist/stranger in the alps"
-foobar2000.exe /select_item:5
-foobar2000.exe /play
+foobar2000.exe /select_item:5 && foobar2000.exe /play
 ```
 
-Note that this example would require that the `Playback/Playback follows cursor` menu item is enabled.
-
-`v0.0.3` addresses the issue by adding `/select_item_and_play`.
+But there is no such requirement when using `/select_item_and_play`.
 
 ```
 foobar2000.exe /select_item_and_play:5
 ```
 
-Also, valid numbers are now clamped so anything in excess of the actual playlist item count will result in the last track being selected.
+When adding a track using the native `/add` command, you can take advantage of adding an optional delay like this.
+
+```
+foobar2000.exe /add "d:\path\to\blah.mp3" /select_item_and_play:1:1500
+```
+
+Without it, the command would execute before the added file had been processed. The delay is in milliseconds. I found during testing `1000` was too low a value but `1500` worked for a single track. YMMV depending on your system/number of files added.
+
+If you add multiple files, consider using a fresh playlist and using 1 as the item index. If adding a single file, you can set the item index far in excess of the actual playlist item count to ensure the last item is selected/played.
 
 # foo_cover_info
 
