@@ -16,12 +16,12 @@ foobar2000.exe /run_main:Library/Search
 foobar2000.exe /run_main:"Playback/Device/Primary Sound Driver"
 ```
 
-The latest version adds 2 additonal commands, `/select_item` and `/select_item_and_play`.
+The latest version adds 2 additional commands, `/select_item` and `/select_item_and_play`.
 
 Note that this example requires `Playback follows cursor` to be enabled.
 
 ```
-foobar2000.exe /select_item:5 && foobar2000.exe /play
+foobar2000.exe /select_item:5 /play
 ```
 
 But there is no such requirement when using `/select_item_and_play`.
