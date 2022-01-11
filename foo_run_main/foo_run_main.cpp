@@ -194,7 +194,7 @@ namespace
 							delay_num = std::stoul(delay_text.get_ptr());
 						}
 					}
-					
+
 					if (delay_num == 0)
 					{
 						select_item(item_num, play);

@@ -58,7 +58,7 @@ public:
 
 			if (!browse_for_image(hwnd, folder, info, image)) return;
 			if (!choose_settings(hwnd)) return;
-	
+
 			const int format = settings::format.get_value();
 			MimeCLSID clsid{};
 			if (format == 0) clsid = CoverResizer::get_clsid(info.mime);
