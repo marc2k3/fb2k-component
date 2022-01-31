@@ -28,4 +28,12 @@ namespace resizer
 		const GUID* guid;
 		const pfc::string8 name;
 	};
+
+	namespace settings
+	{
+		extern cfg_int type;
+		extern cfg_int format;
+		extern cfg_int size;
+		extern GUID get_guid();
+	}
 }
