@@ -11,7 +11,6 @@
 #include <set>
 #include <string>
 
-#include "resource.h"
 #include <foobar2000/SDK/foobar2000.h>
 #include <atlbase.h>
 #include <atlapp.h>
@@ -24,8 +23,9 @@
 using namespace pfc::stringcvt;
 using MimeCLSID = std::optional<CLSID>;
 
-#include "foo_cover_resizer.h"
-#include "DialogSettings.h"
-#include "CoverAttach.h"
-#include "CoverRemover.h"
-#include "CoverResizer.h"
+#include "foo_cover_resizer.hpp"
+#include "resource.hpp"
+#include "DialogSettings.hpp"
+#include "CoverAttach.hpp"
+#include "CoverRemover.hpp"
+#include "CoverResizer.hpp"

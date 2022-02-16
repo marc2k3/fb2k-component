@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "stdafx.hpp"
 
 DECLARE_COMPONENT_VERSION(
 	cinfo::component_name,

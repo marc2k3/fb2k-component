@@ -60,6 +60,7 @@
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeaderFile>stdafx.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -82,6 +83,7 @@
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeaderFile>stdafx.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -92,13 +94,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="CoverAttach.h" />
-    <ClInclude Include="CoverRemover.h" />
-    <ClInclude Include="CoverResizer.h" />
-    <ClInclude Include="DialogSettings.h" />
-    <ClInclude Include="foo_cover_resizer.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="CoverAttach.hpp" />
+    <ClInclude Include="CoverRemover.hpp" />
+    <ClInclude Include="CoverResizer.hpp" />
+    <ClInclude Include="DialogSettings.hpp" />
+    <ClInclude Include="foo_cover_resizer.hpp" />
+    <ClInclude Include="resource.hpp" />
+    <ClInclude Include="stdafx.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ContextMenuResize.cpp" />

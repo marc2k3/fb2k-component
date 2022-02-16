@@ -7,6 +7,6 @@
 #include <set>
 
 #include <foobar2000/SDK/foobar2000.h>
-#include "db.h"
-#include "foo_cover_info.h"
-#include "CoverInfo.h"
+#include "db.hpp"
+#include "foo_cover_info.hpp"
+#include "CoverInfo.hpp"
