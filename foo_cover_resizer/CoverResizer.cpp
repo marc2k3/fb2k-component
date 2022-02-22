@@ -32,17 +32,15 @@ MimeCLSID CoverResizer::get_clsid(const char* str)
 
 album_art_data_ptr CoverResizer::istream_to_data(IStream* stream)
 {
-	album_art_data_ptr data;
 	HGLOBAL hg = nullptr;
-	if (FAILED(GetHGlobalFromStream(stream, &hg))) return data;
+	if (FAILED(GetHGlobalFromStream(stream, &hg))) return album_art_data_ptr();
 	const ULONG new_size = GlobalSize(hg);
 	LPVOID pimage = GlobalLock(hg);
 	std::vector<uint8_t> buffer(new_size);
 	memcpy(buffer.data(), pimage, buffer.size());
 	GlobalUnlock(hg);
 
-	data = album_art_data_impl::g_create(buffer.data(), buffer.size());
-	return data;
+	return album_art_data_impl::g_create(buffer.data(), buffer.size());
 }
 
 bool CoverResizer::resize(double max_size, const std::unique_ptr<Gdiplus::Image>& source, std::unique_ptr<Gdiplus::Bitmap>& out)
@@ -59,7 +57,7 @@ bool CoverResizer::resize(double max_size, const std::unique_ptr<Gdiplus::Image>
 	Gdiplus::Graphics g(out.get());
 	g.SetInterpolationMode(Gdiplus::InterpolationMode::InterpolationModeHighQuality);
 	g.DrawImage(source.get(), 0, 0, new_width, new_height);
-	return true;
+	return out->GetLastStatus() == Gdiplus::Ok;
 }
 
 void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
@@ -142,7 +140,6 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 
 				std::unique_ptr<Gdiplus::Bitmap> resized;
 				if (!resize(dmax, image, resized)) continue;
-				if (resized->GetLastStatus() != Gdiplus::Ok) continue;
 				if (resized->Save(stream.get_ptr(), &clsid.value()) != Gdiplus::Ok) continue;
 			}
 
