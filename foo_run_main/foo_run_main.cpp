@@ -104,9 +104,9 @@ namespace
 			case mainmenu_node::type_group:
 				{
 					path.end_with('/');
-					const uint32_t count = node->get_children_count();
+					const size_t count = node->get_children_count();
 
-					for (const uint32_t i : std::views::iota(0U, count))
+					for (const size_t i : std::views::iota(0U, count))
 					{
 						mainmenu_node::ptr child = node->get_child(i);
 						if (execute_recur(child, path))
@@ -176,15 +176,15 @@ namespace
 			}
 			else if (s.startsWith("/select_item:") || s.startsWith("/select_item_and_play:"))
 			{
-				const uint32_t first_colon = s.find_first(':');
-				const uint32_t second_colon = s.find_last(':');
+				const size_t first_colon = s.find_first(':');
+				const size_t second_colon = s.find_last(':');
 				const bool play = first_colon == 21;
 
 				pfc::string8 item_text = s.subString(first_colon + 1, second_colon - first_colon - 1);
 				if (pfc::string_is_numeric(item_text))
 				{
-					const uint32_t item_num = std::stoul(item_text.get_ptr());
-					uint32_t delay_num = 0;
+					const size_t item_num = std::stoul(item_text.get_ptr());
+					size_t delay_num{};
 
 					if (second_colon < SIZE_MAX && second_colon != first_colon)
 					{
@@ -220,16 +220,16 @@ namespace
 		}
 
 	private:
-		void select_item(uint32_t item_num, bool play)
+		void select_item(size_t item_num, bool play)
 		{
 			auto api = playlist_manager::get();
-			const uint32_t playlistIndex = api->get_active_playlist();
+			const size_t playlistIndex = api->get_active_playlist();
 			if (playlistIndex < api->get_playlist_count())
 			{
-				const uint32_t count = api->playlist_get_item_count(playlistIndex);
+				const size_t count = api->playlist_get_item_count(playlistIndex);
 				if (count > 0)
 				{
-					const uint32_t playlistItemIndex = std::clamp<uint32_t>(item_num, 1, count) - 1;
+					const size_t playlistItemIndex = std::clamp<size_t>(item_num, 1, count) - 1;
 					api->playlist_clear_selection(playlistIndex);
 					api->playlist_set_selection_single(playlistIndex, playlistItemIndex, true);
 					api->playlist_set_focus_item(playlistIndex, playlistItemIndex);

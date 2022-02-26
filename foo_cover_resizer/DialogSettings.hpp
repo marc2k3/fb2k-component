@@ -27,7 +27,7 @@ namespace resizer
 			m_combo_format = GetDlgItem(IDC_COMBO_FORMAT);
 			m_edit_size = GetDlgItem(IDC_EDIT_SIZE);
 
-			for (const uint32_t i : std::views::iota(0U, album_art_ids::num_types()))
+			for (const size_t i : std::views::iota(0U, album_art_ids::num_types()))
 			{
 				m_combo_type.AddString(string_wide_from_utf8_fast(album_art_ids::query_capitalized_name(i)));
 			}

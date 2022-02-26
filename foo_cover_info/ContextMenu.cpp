@@ -41,7 +41,7 @@ namespace cinfo
 
 		uint32_t get_num_items() override
 		{
-			return context_items.size();
+			return pfc::downcast_guarded<uint32_t>(context_items.size());
 		}
 
 		void context_command(uint32_t index, metadb_handle_list_cref handles, const GUID& caller) override

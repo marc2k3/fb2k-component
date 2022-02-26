@@ -9,10 +9,10 @@ public:
 	{
 		auto api = file_lock_manager::get();
 		const GUID what = resizer::settings::get_guid();
-		const uint32_t count = m_handles.get_count();
+		const size_t count = m_handles.get_count();
 		std::set<pfc::string8> paths;
 
-		for (const uint32_t i : std::views::iota(0U, count))
+		for (const size_t i : std::views::iota(0U, count))
 		{
 			abort.check();
 

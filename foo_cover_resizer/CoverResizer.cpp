@@ -8,7 +8,7 @@ MimeCLSID CoverResizer::get_clsid(const char* str)
 {
 	if (s_encoder_map.empty())
 	{
-		uint32_t num = 0, size = 0;
+		uint32_t num{}, size{};
 		if (Gdiplus::GetImageEncodersSize(&num, &size) == Gdiplus::Ok && size > 0)
 		{
 			std::vector<Gdiplus::ImageCodecInfo> codecs(size);
@@ -83,13 +83,13 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 	auto lock_api = file_lock_manager::get();
 
 	const GUID what = m_convert_only ? album_art_ids::cover_front : settings::get_guid();
-	const uint32_t count = m_handles.get_count();
+	const size_t count = m_handles.get_count();
 	const double dmax = static_cast<double>(settings::size.get_value());
 	const int format = settings::format.get_value();
 	std::set<pfc::string8> paths;
-	uint32_t success = 0;
+	uint32_t success{};
 
-	for (const uint32_t i : std::views::iota(0U, count))
+	for (const size_t i : std::views::iota(0U, count))
 	{
 		abort.check();
 

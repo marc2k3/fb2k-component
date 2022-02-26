@@ -16,12 +16,12 @@ namespace cinfo
 				return;
 			}
 
-			const uint32_t count = m_handles.get_count();
-			uint32_t files = 0, found = 0;
+			const size_t count = m_handles.get_count();
+			uint32_t files{}, found{};
 			HashList to_refresh;
 			HashSet hashes;
 
-			for (const uint32_t i : std::views::iota(0U, count))
+			for (const size_t i : std::views::iota(0U, count))
 			{
 				abort.check();
 

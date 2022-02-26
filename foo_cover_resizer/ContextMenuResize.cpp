@@ -35,7 +35,7 @@ public:
 
 	uint32_t get_num_items() override
 	{
-		return context_items.size();
+		return pfc::downcast_guarded<uint32_t>(context_items.size());
 	}
 
 	void context_command(uint32_t index, metadb_handle_list_cref handles, const GUID& caller) override
@@ -124,7 +124,7 @@ private:
 
 		const DWORD bytes = sts.cbSize.LowPart;
 		std::vector<uint8_t> buffer(bytes);
-		ULONG bytes_read = 0;
+		ULONG bytes_read{};
 
 		if (FAILED(stream->Read(buffer.data(), bytes, &bytes_read)) || bytes != bytes_read) return false;
 		album_art_data_ptr data = album_art_data_impl::g_create(buffer.data(), buffer.size());

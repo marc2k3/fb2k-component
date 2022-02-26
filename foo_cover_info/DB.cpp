@@ -122,9 +122,9 @@ namespace cinfo
 		void update(PathList from, PathList to, bool clear_old)
 		{
 			HashList to_refresh;
-			const uint32_t count = from.get_count();
+			const size_t count = from.get_count();
 
-			for (const uint32_t i : std::views::iota(0U, count))
+			for (const size_t i : std::views::iota(0U, count))
 			{
 				metadb_index_hash old_hash = generate_hash(from[i]);
 				metadb_index_hash new_hash = generate_hash(to[i]);
@@ -197,8 +197,8 @@ namespace cinfo
 		HashList to_refresh;
 		HashSet hashes;
 
-		const uint32_t count = handles.get_count();
-		for (const uint32_t i : std::views::iota(0U, count))
+		const size_t count = handles.get_count();
+		for (const size_t i : std::views::iota(0U, count))
 		{
 			metadb_index_hash hash;
 			if (hashHandle(handles[i], hash) && hashes.emplace(hash).second)

@@ -4,9 +4,9 @@ namespace cinfo
 {
 	struct Fields
 	{
-		uint32_t front_cover_width = 0;
-		uint32_t front_cover_height = 0;
-		uint32_t front_cover_bytes = 0;
+		uint32_t front_cover_width{};
+		uint32_t front_cover_height{};
+		uint32_t front_cover_bytes{};
 		pfc::string8 front_cover_format;
 	};
 
