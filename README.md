@@ -66,6 +66,13 @@ Use the right click menu on any library/playlist selection to scan or clear exis
 
 # foo_cover_resizer
 
+### Changes in `v0.1.0` release on `07/03/2022`.
+
+- Support for keeping as `tiff`, `bmp` and `gif` is no longer supported. When resizing, you must choose `JPG` or `PNG`.
+- Requirement for `foobar2000` `v1.6` is no longer necessary. It can run on the `v1.5.x` series.
+- Now uses the `Windows Imaging Component` for resizing/encoding images.
+- When using the `Convert front covers to JPG without resizing` menu item, existing `JPG` images are now processed which may lead to reduced image sizes.
+
 This component has 4 options available via the right click menu.
 
 ### Cover Resizer/Resize
@@ -78,7 +85,7 @@ This option lets you browse for an image file and will then resize (if needed) b
 
 ### Cover Utils/Convert front covers to JPG without resizing
 
-Any art that is already `JPG` will be skipped.
+Self explanatory but also see the changes in `v0.1.0` detailed above.
 
 ### Cover Utils/Remove all except front
 

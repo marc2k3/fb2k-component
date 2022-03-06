@@ -44,11 +44,10 @@ public:
 
 		if (index == 0)
 		{
-			if (MessageBoxW(hwnd, L"This option will ignore any images that are already JPG. Continue?", string_wide_from_utf8_fast(group_utils), MB_ICONWARNING | MB_SETFOREGROUND | MB_YESNO) == IDYES)
-			{
-				auto cb = fb2k::service_new<CoverResizer>(handles, true);
-				threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Converting front covers to JPG...");
-			}
+			if (!api_check()) return;
+
+			auto cb = fb2k::service_new<CoverResizer>(handles, true);
+			threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Converting front covers to JPG...");
 		} 
 		else if (index == 1)
 		{
@@ -63,5 +62,5 @@ public:
 	}
 };
 
-static contextmenu_group_popup_factory g_context_group_utils(guid_context_group_utils, contextmenu_groups::root, group_utils, 1);
+static contextmenu_group_popup_factory g_context_group_utils(guid_context_group_utils, contextmenu_groups::root, "Cover Utils", 1);
 FB2K_SERVICE_FACTORY(ContextMenuUtils);

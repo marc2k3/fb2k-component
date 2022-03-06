@@ -40,6 +40,8 @@ public:
 
 	void context_command(uint32_t index, metadb_handle_list_cref handles, const GUID& caller) override
 	{
+		if (!api_check()) return;
+
 		const HWND hwnd = core_api::get_main_window();
 
 		if (index == 0)
@@ -52,47 +54,32 @@ public:
 		}
 		else if (index == 1)
 		{
-			fb2k::imageInfo_t info;
+			GUID container{};
+			album_art_data_ptr data;
 			pfc::string8 folder = pfc::string_directory(handles[0]->get_path());
-			std::unique_ptr<Gdiplus::Image> image;
+			wil::com_ptr_t<IStream> stream;
+			wil::com_ptr_t<IWICBitmapScaler> scaler;
 
-			if (!browse_for_image(hwnd, folder, info, image)) return;
+			if (!browse_for_image(hwnd, folder, stream)) return;
 			if (!choose_settings(hwnd)) return;
 
 			const int format = settings::format.get_value();
-			MimeCLSID clsid{};
-			if (format == 0) clsid = CoverResizer::get_clsid(info.mime);
-			else if (format == 1) clsid = CoverResizer::get_clsid(mime_jpeg);
-			else if (format == 2) clsid = CoverResizer::get_clsid(mime_png);
-
-			if (clsid.has_value())
+			if (format == 0)
 			{
-				pfc::com_ptr_t<IStream> stream;
-				if (FAILED(CreateStreamOnHGlobal(nullptr, TRUE, stream.receive_ptr()))) return;
-
-				const double dmax = static_cast<double>(settings::size.get_value());
-				std::unique_ptr<Gdiplus::Bitmap> resized;
-				if (CoverResizer::resize(dmax, image, resized)) // returns false if image is already smaller than specified max size
-				{
-					if (resized->GetLastStatus() != Gdiplus::Ok) return;
-					if (resized->Save(stream.get_ptr(), &clsid.value()) != Gdiplus::Ok) return;
-				}
-				else
-				{
-					if (image->Save(stream.get_ptr(), &clsid.value()) != Gdiplus::Ok) return;
-				}
-
-				album_art_data_ptr data = CoverResizer::istream_to_data(stream.get_ptr());
-
-				if (data.is_valid())
-				{
-					auto cb = fb2k::service_new<CoverAttach>(handles, data);
-					threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Attaching cover...");
-				}
+				container = GUID_ContainerFormatJpeg;
 			}
-			else
+			else if (format == 1)
 			{
-				popup_message::g_show("Cannot attach image due to invalid type.", group_resize);
+				container = GUID_ContainerFormatPng;
+			}
+
+			if (FAILED(CoverResizer::resize(stream.get(), scaler))) return;
+			if (FAILED(CoverResizer::encode(container, scaler.get(), data))) return;
+
+			if (data.is_valid())
+			{
+				auto cb = fb2k::service_new<CoverAttach>(handles, data);
+				threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Attaching cover...");
 			}
 		}
 	}
@@ -103,44 +90,13 @@ public:
 	}
 
 private:
-	bool browse_for_image(HWND parent, const char* folder, fb2k::imageInfo_t& info, std::unique_ptr<Gdiplus::Image>& out)
+	bool browse_for_image(HWND parent, const char* folder, wil::com_ptr_t<IStream>& stream)
 	{
-		auto image_api = fb2k::imageLoaderLite::tryGet();
-		if (image_api.is_empty())
-		{
-			popup_message::g_show(image_loader_error, group_resize);
-			return false;
-		}
-
 		pfc::string8 path;
 		if (uGetOpenFileName(parent, "Picture files|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.tiff;*.webp", 0, nullptr, "Browse for image", folder, path, FALSE) == FALSE) return false;
-
 		auto wpath = string_wide_from_utf8_fast(path);
-		pfc::com_ptr_t<IStream> stream;
-		STATSTG sts;
 
-		if (FAILED(SHCreateStreamOnFileEx(wpath, STGM_READ | STGM_SHARE_DENY_WRITE, GENERIC_READ, FALSE, nullptr, stream.receive_ptr()))) return false;
-		if (FAILED(stream->Stat(&sts, STATFLAG_DEFAULT))) return false;
-
-		const DWORD bytes = sts.cbSize.LowPart;
-		std::vector<uint8_t> buffer(bytes);
-		ULONG bytes_read{};
-
-		if (FAILED(stream->Read(buffer.data(), bytes, &bytes_read)) || bytes != bytes_read) return false;
-		album_art_data_ptr data = album_art_data_impl::g_create(buffer.data(), buffer.size());
-		if (data.is_empty()) return false;
-
-		try
-		{
-			std::unique_ptr<Gdiplus::Image> image(image_api->load(data, &info));
-			out = std::move(image);
-			return true;
-		}
-		catch (const std::exception& e)
-		{
-			popup_message::g_show(e.what(), group_resize);
-		}
-		return false;
+		return SUCCEEDED(SHCreateStreamOnFileEx(wpath, STGM_READ | STGM_SHARE_DENY_WRITE, GENERIC_READ, FALSE, nullptr, &stream));
 	}
 
 	bool choose_settings(HWND parent)
@@ -156,5 +112,5 @@ private:
 	}
 };
 
-static contextmenu_group_popup_factory g_context_group_resize(guid_context_group_resize, contextmenu_groups::root, group_resize, 0);
+static contextmenu_group_popup_factory g_context_group_resize(guid_context_group_resize, contextmenu_groups::root, component_name, 0);
 FB2K_SERVICE_FACTORY(ContextMenuResize);

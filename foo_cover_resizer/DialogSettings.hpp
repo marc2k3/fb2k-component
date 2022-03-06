@@ -4,7 +4,6 @@ namespace resizer
 {
 	static constexpr std::array formats =
 	{
-		L"Original",
 		L"JPG",
 		L"PNG"
 	};

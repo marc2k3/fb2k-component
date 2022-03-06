@@ -2,12 +2,9 @@
 
 namespace resizer
 {
-	static constexpr const char* group_resize = "Cover Resizer";
-	static constexpr const char* group_utils = "Cover Utils";
-	static constexpr const char* image_loader_error = "This component requires foobar2000 v1.6 or later.";
-	static constexpr const char* image_clsid_error = "Internal error. Unable to determine CLSID required to save image.";
-	static constexpr const char* mime_jpeg = "image/jpeg";
-	static constexpr const char* mime_png = "image/png";
+	static constexpr const char* component_name = "Cover Resizer";
+	static constexpr const char* wic_error = "WIC initialisation failure. If running Windows 7, please make sure it is fully updated.";
+
 	static constexpr uint32_t threaded_process_flags = threaded_process::flag_show_progress | threaded_process::flag_show_delayed | threaded_process::flag_show_item | threaded_process::flag_show_abort;
 
 	static constexpr GUID guid_context_group_resize = { 0x21ad11b8, 0xf695, 0x4b31, { 0x84, 0x54, 0x18, 0x72, 0x40, 0xab, 0x79, 0xac } };
@@ -20,8 +17,10 @@ namespace resizer
 	static constexpr GUID guid_context_command_remove_all_except_front = { 0xc157f1fe, 0xf264, 0x4ffc, { 0x86, 0xaf, 0xb1, 0x70, 0x46, 0xa4, 0x9e, 0xad } };
 
 	static constexpr GUID guid_cfg_type = { 0x196dbedf, 0x7d74, 0x4c7c, { 0xa3, 0xc0, 0x94, 0xcb, 0xf3, 0x63, 0xd5, 0x19 } };
-	static constexpr GUID guid_cfg_format = { 0x9b40584, 0xc7cd, 0x4ada, { 0x8a, 0x3b, 0x2, 0xb9, 0xbe, 0xd8, 0x98, 0xd3 } };
+	static constexpr GUID guid_cfg_format = { 0x7b8c7bb, 0x1c3c, 0x4a4a, { 0xa7, 0x5a, 0x19, 0xd9, 0xa7, 0xfd, 0x5f, 0x5a } };
 	static constexpr GUID guid_cfg_size = { 0x696f0d7, 0x4f25, 0x4723, { 0xb2, 0x29, 0x2d, 0xdd, 0xa9, 0x4f, 0xb1, 0x5e } };
+
+	bool api_check();
 
 	struct ContextItem
 	{
