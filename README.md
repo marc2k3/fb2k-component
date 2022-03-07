@@ -68,8 +68,8 @@ Use the right click menu on any library/playlist selection to scan or clear exis
 
 ### Changes in `v0.1.0` release on `07/03/2022`.
 
-- Support for keeping as `tiff`, `bmp` and `gif` is no longer supported. When resizing, you must choose `JPG` or `PNG`.
-- Requirement for `foobar2000` `v1.6` is no longer necessary. It can run on the `v1.5.x` series.
+- Support for keeping as `TIFF`, `BMP` and `GIF` is no longer supported. When resizing, you must choose `JPG` or `PNG`.
+- The requirement for `foobar2000` `v1.6` is no longer necessary. It can run on the `v1.5.x` series.
 - Now uses the `Windows Imaging Component` for resizing/encoding images.
 - When using the `Convert front covers to JPG without resizing` menu item, existing `JPG` images are now processed which may lead to reduced image sizes.
 
@@ -77,11 +77,11 @@ This component has 4 options available via the right click menu.
 
 ### Cover Resizer/Resize
 
-This option will resize existing embedded art. There is full support for preserving the image type if they are `JPG`/`PNG`/`TIFF`/`GIF`/`BMP` or you can convert any format to `JPG` or `PNG`. Reading and resizing `WEBP` is supported but it cannot be written back as `WEBP`. `JPG`/`PNG` can be chosen as an alternative.
+This option will resize existing embedded art. Support for reading most common image types is supported but you must choose `JPG` or `PNG` when saving.
 
 ### Cover Resizer/Attach image and Resize
 
-This option lets you browse for an image file and will then resize (if needed) before attaching it to the current selection. It has the same `WEBP` limitations as the above method.
+This option lets you browse for an image file and will then resize (if needed) before attaching it to the current selection.
 
 ### Cover Utils/Convert front covers to JPG without resizing
 
