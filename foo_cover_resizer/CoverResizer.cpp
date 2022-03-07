@@ -17,7 +17,7 @@ HRESULT CoverResizer::decode(IStream* stream, wil::com_ptr_t<IWICBitmapSource>& 
 	return S_OK;
 }
 
-HRESULT CoverResizer::encode(const GUID& container, IWICBitmapSource* source, album_art_data_ptr& data)
+HRESULT CoverResizer::encode(Format format, IWICBitmapSource* source, album_art_data_ptr& data)
 {
 	data.reset();
 	uint32_t width{}, height{};
@@ -32,7 +32,7 @@ HRESULT CoverResizer::encode(const GUID& container, IWICBitmapSource* source, al
 	RETURN_IF_FAILED(CreateStreamOnHGlobal(nullptr, TRUE, &stream));
 	RETURN_IF_FAILED(g_imaging_factory->CreateStream(&wic_stream));
 	RETURN_IF_FAILED(wic_stream->InitializeFromIStream(stream.get()));
-	RETURN_IF_FAILED(g_imaging_factory->CreateEncoder(container, nullptr, &encoder));
+	RETURN_IF_FAILED(g_imaging_factory->CreateEncoder(format == Format::JPG ? GUID_ContainerFormatJpeg : GUID_ContainerFormatPng, nullptr, &encoder));
 	RETURN_IF_FAILED(encoder->Initialize(wic_stream.get(), WICBitmapEncoderNoCache));
 	RETURN_IF_FAILED(encoder->CreateNewFrame(&frame_encode, nullptr));
 	RETURN_IF_FAILED(frame_encode->Initialize(nullptr));
@@ -52,11 +52,9 @@ HRESULT CoverResizer::encode(const GUID& container, IWICBitmapSource* source, al
 	return S_OK;
 }
 
-HRESULT CoverResizer::resize(IStream* stream, wil::com_ptr_t<IWICBitmapScaler>& scaler)
+HRESULT CoverResizer::resize(IWICBitmapSource* source, wil::com_ptr_t<IWICBitmapScaler>& scaler)
 {
 	uint32_t old_width{}, old_height{};
-	wil::com_ptr_t<IWICBitmapSource> source;
-	RETURN_IF_FAILED(decode(stream, source));
 	RETURN_IF_FAILED(source->GetSize(&old_width, &old_height));
 
 	const double dmax = static_cast<double>(settings::size.get_value());
@@ -69,7 +67,7 @@ HRESULT CoverResizer::resize(IStream* stream, wil::com_ptr_t<IWICBitmapScaler>& 
 	const uint32_t new_height = static_cast<uint32_t>(dh * s);
 
 	RETURN_IF_FAILED(g_imaging_factory->CreateBitmapScaler(&scaler));
-	RETURN_IF_FAILED(scaler->Initialize(source.get(), new_width, new_height, WICBitmapInterpolationModeFant));
+	RETURN_IF_FAILED(scaler->Initialize(source, new_width, new_height, WICBitmapInterpolationModeFant));
 	return S_OK;
 }
 
@@ -83,17 +81,6 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 	const size_t count = m_handles.get_count();
 	std::set<pfc::string8> paths;
 	uint32_t success{};
-
-	const int format = settings::format.get_value();
-	GUID container{};
-	if (m_convert_only || format == 0)
-	{
-		container = GUID_ContainerFormatJpeg;
-	}
-	else
-	{
-		container = GUID_ContainerFormatPng;
-	}
 
 	for (const size_t i : std::views::iota(0U, count))
 	{
@@ -115,19 +102,24 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 			const uint8_t* ptr = static_cast<const uint8_t*>(data->get_ptr());
 			const uint32_t bytes = pfc::downcast_guarded<uint32_t>(data->get_size());
 			wil::com_ptr_t<IStream> stream;
+			wil::com_ptr_t<IWICBitmapSource> source;
 			stream.attach(SHCreateMemStream(ptr, bytes));
+
+			if (FAILED(decode(stream.get(), source)))
+			{
+				FB2K_console_formatter() << component_name << ": Unable to decode image data found in: " << path;
+				continue;
+			}
 
 			if (m_convert_only)
 			{
-				wil::com_ptr_t<IWICBitmapSource> source;
-				if (FAILED(decode(stream.get(), source))) continue;
-				if (FAILED(encode(container, source.get(), data))) continue;
+				if (FAILED(encode(Format::JPG, source.get(), data))) continue;
 			}
 			else
 			{
 				wil::com_ptr_t<IWICBitmapScaler> scaler;
-				if (FAILED(resize(stream.get(), scaler))) continue;
-				if (FAILED(encode(container, scaler.get(), data))) continue;
+				if (FAILED(resize(source.get(), scaler))) continue;
+				if (FAILED(encode(static_cast<Format>(settings::format.get_value()), scaler.get(), data))) continue;
 			}
 
 			if (data.is_empty()) continue;

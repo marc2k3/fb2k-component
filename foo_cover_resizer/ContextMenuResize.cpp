@@ -54,27 +54,16 @@ public:
 		}
 		else if (index == 1)
 		{
-			GUID container{};
 			album_art_data_ptr data;
 			pfc::string8 folder = pfc::string_directory(handles[0]->get_path());
-			wil::com_ptr_t<IStream> stream;
+			wil::com_ptr_t<IWICBitmapSource> source;
 			wil::com_ptr_t<IWICBitmapScaler> scaler;
 
-			if (!browse_for_image(hwnd, folder, stream)) return;
+			if (!browse_for_image(hwnd, folder, source)) return;
 			if (!choose_settings(hwnd)) return;
 
-			const int format = settings::format.get_value();
-			if (format == 0)
-			{
-				container = GUID_ContainerFormatJpeg;
-			}
-			else if (format == 1)
-			{
-				container = GUID_ContainerFormatPng;
-			}
-
-			if (FAILED(CoverResizer::resize(stream.get(), scaler))) return;
-			if (FAILED(CoverResizer::encode(container, scaler.get(), data))) return;
+			if (FAILED(CoverResizer::resize(source.get(), scaler))) return;
+			if (FAILED(CoverResizer::encode(static_cast<Format>(settings::format.get_value()), scaler.get(), data))) return;
 
 			if (data.is_valid())
 			{
@@ -90,13 +79,20 @@ public:
 	}
 
 private:
-	bool browse_for_image(HWND parent, const char* folder, wil::com_ptr_t<IStream>& stream)
+	bool browse_for_image(HWND parent, const char* folder, wil::com_ptr_t<IWICBitmapSource>& source)
 	{
 		pfc::string8 path;
 		if (uGetOpenFileName(parent, "Picture files|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.tiff;*.webp", 0, nullptr, "Browse for image", folder, path, FALSE) == FALSE) return false;
 		auto wpath = string_wide_from_utf8_fast(path);
 
-		return SUCCEEDED(SHCreateStreamOnFileEx(wpath, STGM_READ | STGM_SHARE_DENY_WRITE, GENERIC_READ, FALSE, nullptr, &stream));
+		wil::com_ptr_t<IStream> stream;
+		if (FAILED(SHCreateStreamOnFileEx(wpath, STGM_READ | STGM_SHARE_DENY_WRITE, GENERIC_READ, FALSE, nullptr, &stream))) return false;
+		if (FAILED(CoverResizer::decode(stream.get(), source)))
+		{
+			popup_message::g_show("Unable to decode selected file.", component_name);
+			return false;
+		}
+		return true;
 	}
 
 	bool choose_settings(HWND parent)

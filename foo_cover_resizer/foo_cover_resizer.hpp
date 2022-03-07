@@ -22,6 +22,12 @@ namespace resizer
 
 	bool api_check();
 
+	enum class Format
+	{
+		JPG,
+		PNG,
+	};
+
 	struct ContextItem
 	{
 		const GUID* guid;

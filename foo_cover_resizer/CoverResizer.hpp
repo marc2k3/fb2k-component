@@ -6,8 +6,8 @@ public:
 	CoverResizer(metadb_handle_list_cref handles, bool convert_only = false);
 
 	static HRESULT decode(IStream* stream, wil::com_ptr_t<IWICBitmapSource>& source);
-	static HRESULT encode(const GUID& container, IWICBitmapSource* source, album_art_data_ptr& data);
-	static HRESULT resize(IStream* stream, wil::com_ptr_t<IWICBitmapScaler>& scaler);
+	static HRESULT encode(resizer::Format format, IWICBitmapSource* source, album_art_data_ptr& data);
+	static HRESULT resize(IWICBitmapSource* source, wil::com_ptr_t<IWICBitmapScaler>& scaler);
 
 	void run(threaded_process_status& status, abort_callback& abort) override;
 
