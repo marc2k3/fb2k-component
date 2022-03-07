@@ -43,11 +43,10 @@ HRESULT CoverResizer::encode(const GUID& container, IWICBitmapSource* source, al
 
 	HGLOBAL hg = nullptr;
 	RETURN_IF_FAILED(GetHGlobalFromStream(stream.get(), &hg));
-	const ULONG new_size = GlobalSize(hg);
-	LPVOID pimage = GlobalLock(hg);
-	std::vector<uint8_t> buffer(new_size);
-	memcpy(buffer.data(), pimage, buffer.size());
-	GlobalUnlock(hg);
+	auto image = wil::unique_hglobal_locked(hg);
+	auto size = GlobalSize(image.get());
+	std::vector<uint8_t> buffer(size);
+	memcpy(buffer.data(), image.get(), buffer.size());
 
 	data = album_art_data_impl::g_create(buffer.data(), buffer.size());
 	return S_OK;
