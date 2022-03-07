@@ -72,6 +72,8 @@ Use the right click menu on any library/playlist selection to scan or clear exis
 - The requirement for `foobar2000` `v1.6` is no longer necessary. It can run on the `v1.5.x` series.
 - Now uses the `Windows Imaging Component` for resizing/encoding images.
 - When using the `Convert front covers to JPG without resizing` menu item, existing `JPG` images are now processed which may lead to reduced image sizes.
+- Due to the above changes, if you want to process `WebP` images, you must have the `WebP` codecs installed from the `Windows Store` if using `Windows 10` or later. If you are using `Windows 7/8/8.1`, you can install the [Google WebP installer](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/WebpCodecSetup.exe).
+- It's also possible to decode/resize more exotic formats like `HEIF` and `AVIF` when using `Windows 10` or later and have the relevant codecs from the `Windows Store` installed. However, the chances of people having these embedded in their audio files is pretty low!
 
 This component has 4 options available via the right click menu.
 
@@ -81,7 +83,7 @@ This option will resize existing embedded art. Support for reading most common i
 
 ### Cover Resizer/Attach image and Resize
 
-This option lets you browse for an image file and will then resize (if needed) before attaching it to the current selection.
+This option lets you browse for an image file and will then resize it before attaching it to the current selection. Images already smaller than the specified max size will not be processed. You should attach those via the built-in method.
 
 ### Cover Utils/Convert front covers to JPG without resizing
 
