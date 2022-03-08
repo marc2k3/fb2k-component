@@ -79,7 +79,7 @@ This component has 4 options available via the right click menu.
 
 ### Cover Resizer/Resize
 
-This option will resize existing embedded art. Support for reading most common image types is supported but you must choose `JPG` or `PNG` when saving.
+This option will resize existing embedded art. Reading most common image types is supported but you must choose `JPG` or `PNG` when saving.
 
 ### Cover Resizer/Attach image and Resize
 
@@ -87,7 +87,7 @@ This option lets you browse for an image file and will then resize it before att
 
 ### Cover Utils/Convert front covers to JPG without resizing
 
-Self explanatory but also see the changes in `v0.1.0` detailed above.
+Images that are already `JPG` will be re-encoded which may reduce their size. If you're concerned about quality loss, do not use or test on copies first!
 
 ### Cover Utils/Remove all except front
 
