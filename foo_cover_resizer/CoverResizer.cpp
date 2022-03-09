@@ -1,75 +1,8 @@
 #include "stdafx.hpp"
 
-extern wil::com_ptr_nothrow<IWICImagingFactory> g_imaging_factory;
-
 using namespace resizer;
 
-CoverResizer::CoverResizer(metadb_handle_list_cref handles, bool convert_only) : m_handles(handles), m_convert_only(convert_only) {}
-
-HRESULT CoverResizer::decode(IStream* stream, wil::com_ptr_t<IWICBitmapSource>& source)
-{
-	wil::com_ptr_t<IWICBitmapDecoder> decoder;
-	wil::com_ptr_t<IWICBitmapFrameDecode> frame_decode;
-
-	RETURN_IF_FAILED(g_imaging_factory->CreateDecoderFromStream(stream, nullptr, WICDecodeMetadataCacheOnDemand, &decoder));
-	RETURN_IF_FAILED(decoder->GetFrame(0, &frame_decode));
-	RETURN_IF_FAILED(WICConvertBitmapSource(GUID_WICPixelFormat32bppPBGRA, frame_decode.get(), &source));
-	return S_OK;
-}
-
-HRESULT CoverResizer::encode(Format format, IWICBitmapSource* source, album_art_data_ptr& data)
-{
-	data.reset();
-	uint32_t width{}, height{};
-	RETURN_IF_FAILED(source->GetSize(&width, &height));
-	WICRect rect(0, 0, width, height);
-
-	wil::com_ptr_t<IStream> stream;
-	wil::com_ptr_t<IWICBitmapEncoder> encoder;
-	wil::com_ptr_t<IWICBitmapFrameEncode> frame_encode;
-	wil::com_ptr_t<IWICStream> wic_stream;
-
-	RETURN_IF_FAILED(CreateStreamOnHGlobal(nullptr, TRUE, &stream));
-	RETURN_IF_FAILED(g_imaging_factory->CreateStream(&wic_stream));
-	RETURN_IF_FAILED(wic_stream->InitializeFromIStream(stream.get()));
-	RETURN_IF_FAILED(g_imaging_factory->CreateEncoder(format == Format::JPG ? GUID_ContainerFormatJpeg : GUID_ContainerFormatPng, nullptr, &encoder));
-	RETURN_IF_FAILED(encoder->Initialize(wic_stream.get(), WICBitmapEncoderNoCache));
-	RETURN_IF_FAILED(encoder->CreateNewFrame(&frame_encode, nullptr));
-	RETURN_IF_FAILED(frame_encode->Initialize(nullptr));
-	RETURN_IF_FAILED(frame_encode->SetSize(width, height));
-	RETURN_IF_FAILED(frame_encode->WriteSource(source, &rect));
-	RETURN_IF_FAILED(frame_encode->Commit());
-	RETURN_IF_FAILED(encoder->Commit());
-
-	HGLOBAL hg = nullptr;
-	RETURN_IF_FAILED(GetHGlobalFromStream(stream.get(), &hg));
-	auto image = wil::unique_hglobal_locked(hg);
-	auto size = GlobalSize(image.get());
-	std::vector<uint8_t> buffer(size);
-	memcpy(buffer.data(), image.get(), buffer.size());
-
-	data = album_art_data_impl::g_create(buffer.data(), buffer.size());
-	return S_OK;
-}
-
-HRESULT CoverResizer::resize(IWICBitmapSource* source, wil::com_ptr_t<IWICBitmapScaler>& scaler)
-{
-	uint32_t old_width{}, old_height{};
-	RETURN_IF_FAILED(source->GetSize(&old_width, &old_height));
-
-	const double dmax = static_cast<double>(settings::size.get_value());
-	const double dw = static_cast<double>(old_width);
-	const double dh = static_cast<double>(old_height);
-	if (dw <= dmax && dh <= dmax) return E_FAIL; // nothing to do
-
-	const double s = std::min(dmax / dw, dmax / dh);
-	const uint32_t new_width = static_cast<uint32_t>(dw * s);
-	const uint32_t new_height = static_cast<uint32_t>(dh * s);
-
-	RETURN_IF_FAILED(g_imaging_factory->CreateBitmapScaler(&scaler));
-	RETURN_IF_FAILED(scaler->Initialize(source, new_width, new_height, WICBitmapInterpolationModeFant));
-	return S_OK;
-}
+CoverResizer::CoverResizer(metadb_handle_list_cref handles, Format format, bool convert_only) : m_handles(handles), m_format(format), m_convert_only(convert_only) {}
 
 void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 {
@@ -113,13 +46,13 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 
 			if (m_convert_only)
 			{
-				if (FAILED(encode(Format::JPG, source.get(), data))) continue;
+				if (FAILED(encode(m_format, source.get(), data))) continue;
 			}
 			else
 			{
 				wil::com_ptr_t<IWICBitmapScaler> scaler;
 				if (FAILED(resize(source.get(), scaler))) continue;
-				if (FAILED(encode(static_cast<Format>(settings::format.get_value()), scaler.get(), data))) continue;
+				if (FAILED(encode(m_format, scaler.get(), data))) continue;
 			}
 
 			if (data.is_empty()) continue;

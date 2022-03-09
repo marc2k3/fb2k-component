@@ -5,7 +5,7 @@ using namespace resizer;
 static const std::vector<ContextItem> context_items =
 {
 	{ &guid_context_command_resize, "Resize" },
-	{ &guid_context_command_attach_and_resize, "Attach image and Resize" },
+	{ &guid_context_command_resize_and_attach, "Browse for file, resize and attach" },
 };
 
 class ContextMenuResize : public contextmenu_item_simple
@@ -46,9 +46,10 @@ public:
 
 		if (index == 0)
 		{
-			if (choose_settings(hwnd))
+			if (choose_settings(hwnd, true))
 			{
-				auto cb = fb2k::service_new<CoverResizer>(handles);
+				const Format format = formats[settings::format].first;
+				auto cb = fb2k::service_new<CoverResizer>(handles, format);
 				threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Resizing covers...");
 			}
 		}
@@ -60,10 +61,11 @@ public:
 			wil::com_ptr_t<IWICBitmapScaler> scaler;
 
 			if (!browse_for_image(hwnd, folder, source)) return;
-			if (!choose_settings(hwnd)) return;
+			if (!choose_settings(hwnd, true)) return;
+			if (FAILED(resize(source.get(), scaler))) return;
 
-			if (FAILED(CoverResizer::resize(source.get(), scaler))) return;
-			if (FAILED(CoverResizer::encode(static_cast<Format>(settings::format.get_value()), scaler.get(), data))) return;
+			const Format format = formats[settings::format].first;
+			if (FAILED(encode(format, scaler.get(), data))) return;
 
 			if (data.is_valid())
 			{
@@ -76,35 +78,6 @@ public:
 	void get_item_name(uint32_t index, pfc::string_base& out) override
 	{
 		out = context_items[index].name;
-	}
-
-private:
-	bool browse_for_image(HWND parent, const char* folder, wil::com_ptr_t<IWICBitmapSource>& source)
-	{
-		pfc::string8 path;
-		if (uGetOpenFileName(parent, "Picture files|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.tiff;*.webp", 0, nullptr, "Browse for image", folder, path, FALSE) == FALSE) return false;
-		auto wpath = string_wide_from_utf8_fast(path);
-
-		wil::com_ptr_t<IStream> stream;
-		if (FAILED(SHCreateStreamOnFileEx(wpath, STGM_READ | STGM_SHARE_DENY_WRITE, GENERIC_READ, FALSE, nullptr, &stream))) return false;
-		if (FAILED(CoverResizer::decode(stream.get(), source)))
-		{
-			popup_message::g_show("Unable to decode selected file.", component_name);
-			return false;
-		}
-		return true;
-	}
-
-	bool choose_settings(HWND parent)
-	{
-		modal_dialog_scope scope;
-		if (scope.can_create())
-		{
-			scope.initialize(parent);
-			CDialogSettings dlg;
-			return dlg.DoModal(parent) == IDOK;
-		}
-		return false;
 	}
 };
 

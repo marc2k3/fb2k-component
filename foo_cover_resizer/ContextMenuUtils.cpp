@@ -4,7 +4,8 @@ using namespace resizer;
 
 static const std::vector<ContextItem> context_items =
 {
-	{ &guid_context_command_convert, "Convert front covers to JPG without resizng" },
+	{ &guid_context_command_convert, "Convert without resizng" },
+	{ &guid_context_command_convert_and_attach, "Browse for file, convert and attach" },
 	{ &guid_context_command_remove_all_except_front, "Remove all except front" },
 };
 
@@ -40,16 +41,37 @@ public:
 
 	void context_command(uint32_t index, metadb_handle_list_cref handles, const GUID& caller) override
 	{
+		if (!api_check()) return;
+
 		const HWND hwnd = core_api::get_main_window();
 
 		if (index == 0)
 		{
-			if (!api_check()) return;
+			if (!choose_settings(hwnd, false)) return;
 
-			auto cb = fb2k::service_new<CoverResizer>(handles, true);
-			threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Converting front covers to JPG...");
-		} 
+			const Format format = formats[settings::format].first;
+			auto cb = fb2k::service_new<CoverResizer>(handles, format, true);
+			threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Converting covers...");
+		}
 		else if (index == 1)
+		{
+			album_art_data_ptr data;
+			pfc::string8 folder = pfc::string_directory(handles[0]->get_path());
+			wil::com_ptr_t<IWICBitmapSource> source;
+
+			if (!browse_for_image(hwnd, folder, source)) return;
+			if (!choose_settings(hwnd, false)) return;
+
+			const Format format = formats[settings::format].first;
+			if (FAILED(encode(format, source.get(), data))) return;
+
+			if (data.is_valid())
+			{
+				auto cb = fb2k::service_new<CoverAttach>(handles, data);
+				threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Attaching cover...");
+			}
+		}
+		else if (index == 2)
 		{
 			auto cb = fb2k::service_new<CoverRemover>(handles);
 			threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Removing covers...");

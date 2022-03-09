@@ -1,17 +1,16 @@
 #pragma once
 
+using resizer::Format;
+
 class CoverResizer : public threaded_process_callback
 {
 public:
-	CoverResizer(metadb_handle_list_cref handles, bool convert_only = false);
-
-	static HRESULT decode(IStream* stream, wil::com_ptr_t<IWICBitmapSource>& source);
-	static HRESULT encode(resizer::Format format, IWICBitmapSource* source, album_art_data_ptr& data);
-	static HRESULT resize(IWICBitmapSource* source, wil::com_ptr_t<IWICBitmapScaler>& scaler);
+	CoverResizer(metadb_handle_list_cref handles, resizer::Format format, bool convert_only = false);
 
 	void run(threaded_process_status& status, abort_callback& abort) override;
 
 private:
-	bool m_convert_only = false;
+	Format m_format = Format::JPG;
+	bool m_convert_only{};
 	metadb_handle_list m_handles;
 };

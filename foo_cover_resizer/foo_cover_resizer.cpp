@@ -15,15 +15,6 @@ namespace resizer
 
 	VALIDATE_COMPONENT_FILENAME("foo_cover_resizer.dll");
 
-	bool api_check()
-	{
-		if (g_imaging_factory)
-			return true;
-
-		popup_message::g_show(wic_error, component_name);
-		return false;
-	}
-
 	namespace settings
 	{
 		cfg_int type(guid_cfg_type, 0);
@@ -32,7 +23,7 @@ namespace resizer
 
 		GUID get_guid()
 		{
-			return album_art_ids::query_type(type.get_value());
+			return album_art_ids::query_type(type);
 		}
 	}
 

@@ -2,15 +2,11 @@
 
 namespace resizer
 {
-	static constexpr std::array formats =
-	{
-		L"JPG",
-		L"PNG"
-	};
-
 	class CDialogSettings : public CDialogImpl<CDialogSettings>
 	{
 	public:
+		CDialogSettings(bool show_size) : m_show_size(show_size) {}
+
 		BEGIN_MSG_MAP_EX(CDialogSettings)
 			MSG_WM_INITDIALOG(OnInitDialog)
 			COMMAND_RANGE_HANDLER_EX(IDOK, IDCANCEL, OnCloseCmd)
@@ -33,12 +29,21 @@ namespace resizer
 
 			for (const auto& format : formats)
 			{
-				m_combo_format.AddString(format);
+				m_combo_format.AddString(format.second.data());
 			}
 
-			m_combo_type.SetCurSel(settings::type.get_value());
-			m_combo_format.SetCurSel(settings::format.get_value());
-			pfc::setWindowText(m_edit_size, std::to_string(settings::size.get_value()).c_str());
+			m_combo_type.SetCurSel(settings::type);
+			m_combo_format.SetCurSel(settings::format);
+
+			if (m_show_size)
+			{
+				pfc::setWindowText(m_edit_size, std::to_string(settings::size).c_str());
+			}
+			else
+			{
+				GetDlgItem(IDC_LABEL_SIZE).ShowWindow(SW_HIDE);
+				m_edit_size.ShowWindow(SW_HIDE);
+			}
 
 			CenterWindow();
 			return TRUE;
@@ -57,7 +62,11 @@ namespace resizer
 			{
 				settings::type = m_combo_type.GetCurSel();
 				settings::format = m_combo_format.GetCurSel();
-				settings::size = GetSize();
+
+				if (m_show_size)
+				{
+					settings::size = GetSize();
+				}
 			}
 
 			EndDialog(nID);
@@ -71,5 +80,6 @@ namespace resizer
 		CButton m_button_ok;
 		CComboBox m_combo_format, m_combo_type;
 		CEdit m_edit_size;
+		bool m_show_size{};
 	};
 }
