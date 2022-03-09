@@ -8,7 +8,7 @@ namespace resizer
 {
 	DECLARE_COMPONENT_VERSION(
 		component_name,
-		"0.1.1",
+		"0.2.0",
 		"Copyright (C) 2022 marc2003\n\n"
 		"Build: " __TIME__ ", " __DATE__
 	);
