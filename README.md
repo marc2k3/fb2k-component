@@ -4,6 +4,10 @@ https://github.com/marc2k3/fb2k-component/releases/latest
 
 # foo_run_main
 
+## Usage
+
+### Executing main menu commands
+
 Unlike the built in command line handler/`foo_runcmd`, this component has full support for dynamically generated menu commands meaning you can use `Edit` commands and switch playlists, change output devices etc.
 
 To avoid ambiguity with common names that might appear more than once under different sub menus, you must supply the full path to the command. Examples:
@@ -15,6 +19,8 @@ foobar2000.exe /run_main:Library/Search
 // use double quotes when command contains spaces
 foobar2000.exe /run_main:"Playback/Device/Primary Sound Driver"
 ```
+
+### Selecting and playing playlist items
 
 The latest version adds 2 additional commands, `/select_item` and `/select_item_and_play`.
 
@@ -48,7 +54,7 @@ If you add multiple files, consider using a fresh playlist and using 1 as the it
 - Scanning from the `Library` menu is no longer an option. Just use the context menu anywhere.
 - The minimum requirement for `foobar2000` has been bumped to `v1.6`.
 
-### Usage
+## Usage
 
 Because it's not possible to query files for embedded album art within foobar2000, this component scans a selection of files and stores the results in a database. Updating of data is not automatic so if you add/remove art at a later date, it's up to you to run the scan again. Data is available in the following fields which are available wherever title formatting is supported.
 
@@ -66,16 +72,18 @@ Use the right click menu on any library/playlist selection to scan or clear exis
 
 # foo_cover_resizer
 
-### Changes in `v0.1.0` release on `07/03/2022`.
+### Changes in component version `v0.1.0` released on `07/03/2022`.
 
 - Support for keeping as `TIFF`, `BMP` and `GIF` is no longer supported. When resizing, you must choose `JPG` or `PNG`.
 - The requirement for `foobar2000` `v1.6` is no longer necessary. It can run on the `v1.5.x` series.
 - Now uses the `Windows Imaging Component` for resizing/encoding images.
 - When using the `Convert front covers to JPG without resizing` menu item, existing `JPG` images are now processed which may lead to reduced image sizes.
-- Due to the above changes, if you want to process `WebP` images, you must have the `WebP` codecs installed from the `Windows Store` if using `Windows 10` or later. If you are using `Windows 7/8/8.1`, you can install the [Google WebP installer](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/WebpCodecSetup.exe).
+- Due to the above changes, if you want to process `WebP` images, you must have the `WebP` codecs installed. `Windows 10/11` users should already have them installed by default from the `Windows Store`. If you are using `Windows 7/8/8.1`, you can install the [Google WebP installer](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/WebpCodecSetup.exe).
 - It's also possible to decode/resize more exotic formats like `HEIF` and `AVIF` when using `Windows 10` or later and have the relevant codecs from the `Windows Store` installed. However, the chances of people having these embedded in their audio files is pretty low!
 
-This component has 4 options available via the right click menu.
+## Usage
+
+This component has 4 options available via the right click menu on any playlist/library selection.
 
 ### Cover Resizer/Resize
 
