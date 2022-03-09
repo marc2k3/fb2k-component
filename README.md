@@ -48,12 +48,6 @@ If you add multiple files, consider using a fresh playlist and using 1 as the it
 
 # foo_cover_info
 
-### Breaking changes in component version `v0.1.0` released on `07/04/2021`.
-
-- All previously saved data will be lost as the internal storage mechanism has changed. All files will need to be scanned again.
-- Scanning from the `Library` menu is no longer an option. Just use the context menu anywhere.
-- The minimum requirement for `foobar2000` has been bumped to `v1.6`.
-
 ## Usage
 
 Because it's not possible to query files for embedded album art within foobar2000, this component scans a selection of files and stores the results in a database. Updating of data is not automatic so if you add/remove art at a later date, it's up to you to run the scan again. Data is available in the following fields which are available wherever title formatting is supported.
@@ -72,30 +66,25 @@ Use the right click menu on any library/playlist selection to scan or clear exis
 
 # foo_cover_resizer
 
-### Changes in component version `v0.1.0` released on `07/03/2022`.
-
-- Support for keeping as `TIFF`, `BMP` and `GIF` is no longer supported. When resizing, you must choose `JPG` or `PNG`.
-- The requirement for `foobar2000` `v1.6` is no longer necessary. It can run on the `v1.5.x` series.
-- Now uses the `Windows Imaging Component` for resizing/encoding images.
-- When using the `Convert front covers to JPG without resizing` menu item, existing `JPG` images are now processed which may lead to reduced image sizes.
-- Due to the above changes, if you want to process `WebP` images, you must have the `WebP` codecs installed. `Windows 10/11` users should already have them installed by default from the `Windows Store`. If you are using `Windows 7/8/8.1`, you can install the [Google WebP installer](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/WebpCodecSetup.exe).
-- It's also possible to decode/resize more exotic formats like `HEIF` and `AVIF` when using `Windows 10` or later and have the relevant codecs from the `Windows Store` installed. However, the chances of people having these embedded in their audio files is pretty low!
-
 ## Usage
 
-This component has 4 options available via the right click menu on any playlist/library selection.
+This component has 5 options available via the right click menu on any playlist/library selection. As of `v0.2.0`, writing `WEBP` is now supported.
 
 ### Cover Resizer/Resize
 
-This option will resize existing embedded art. Reading most common image types is supported but you must choose `JPG` or `PNG` when saving.
+This option will resize existing embedded art. Reading most common image types is supported but you must choose `JPG`,`PNG` or `WEBP` when saving.
 
-### Cover Resizer/Attach image and Resize
+### Cover Resizer/Browse for file, resize and attach
 
-This option lets you browse for an image file and will then resize it before attaching it to the current selection. Images already smaller than the specified max size will not be processed. You should attach those via the built-in method.
+This option lets you browse for an image file and will then resize it before attaching it to the current selection. Images already smaller than the specified max size will not be processed. You should attach those via native `foobar2000` option under the `Tagging` menu.
 
-### Cover Utils/Convert front covers to JPG without resizing
+### Cover Utils/Convert without resizng
 
-Images that are already `JPG` will be re-encoded which may reduce their size. If you're concerned about quality loss, do not use or test on copies first!
+Converts existing embedded art without resizing. You must choose `JPG`, `PNG` or `WEBP`.
+
+### Cover Utils/Browse for file, convert and attach
+
+Use the file picker and then choose to convert the file to `JPG`, `PNG` or `WEBP`.
 
 ### Cover Utils/Remove all except front
 
