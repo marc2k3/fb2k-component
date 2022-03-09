@@ -99,7 +99,7 @@
     <ClInclude Include="CoverResizer.hpp" />
     <ClInclude Include="DialogSettings.hpp" />
     <ClInclude Include="foo_cover_resizer.hpp" />
-    <ClInclude Include="Helpers.h" />
+    <ClInclude Include="Helpers.hpp" />
     <ClInclude Include="resource.hpp" />
     <ClInclude Include="stdafx.hpp" />
   </ItemGroup>

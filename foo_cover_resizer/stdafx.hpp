@@ -26,7 +26,7 @@ using namespace pfc::stringcvt;
 #include "foo_cover_resizer.hpp"
 #include "resource.hpp"
 #include "DialogSettings.hpp"
-#include "Helpers.h"
+#include "Helpers.hpp"
 #include "CoverAttach.hpp"
 #include "CoverRemover.hpp"
 #include "CoverResizer.hpp"
