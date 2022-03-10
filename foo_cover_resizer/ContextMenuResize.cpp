@@ -49,7 +49,7 @@ public:
 			if (choose_settings(hwnd, true))
 			{
 				const Format format = formats[settings::format].first;
-				auto cb = fb2k::service_new<CoverResizer>(handles, format);
+				auto cb = fb2k::service_new<CoverConverterResizer>(CoverConverterResizer::Action::resize, handles, format);
 				threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Resizing covers...");
 			}
 		}

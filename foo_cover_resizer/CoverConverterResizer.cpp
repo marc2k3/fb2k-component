@@ -2,15 +2,15 @@
 
 using namespace resizer;
 
-CoverResizer::CoverResizer(metadb_handle_list_cref handles, Format format, bool convert_only) : m_handles(handles), m_format(format), m_convert_only(convert_only) {}
+CoverConverterResizer::CoverConverterResizer(Action action, metadb_handle_list_cref handles, Format format) : m_action(action), m_handles(handles), m_format(format) {}
 
-void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
+void CoverConverterResizer::run(threaded_process_status& status, abort_callback& abort)
 {
 	album_art_editor::ptr editor_ptr;
 	album_art_extractor::ptr extractor_ptr;
 	auto lock_api = file_lock_manager::get();
 
-	const GUID what = m_convert_only ? album_art_ids::cover_front : settings::get_guid();
+	const GUID what = m_action == Action::convert ? album_art_ids::cover_front : settings::get_guid();
 	const size_t count = m_handles.get_count();
 	std::set<pfc::string8> paths;
 	uint32_t success{};
@@ -44,7 +44,7 @@ void CoverResizer::run(threaded_process_status& status, abort_callback& abort)
 				continue;
 			}
 
-			if (m_convert_only)
+			if (m_action == Action::convert)
 			{
 				if (FAILED(encode(m_format, source.get(), data))) continue;
 			}

@@ -50,7 +50,7 @@ public:
 			if (!choose_settings(hwnd, false)) return;
 
 			const Format format = formats[settings::format].first;
-			auto cb = fb2k::service_new<CoverResizer>(handles, format, true);
+			auto cb = fb2k::service_new<CoverConverterResizer>(CoverConverterResizer::Action::convert, handles, format);
 			threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Converting covers...");
 		}
 		else if (index == 1)

@@ -96,7 +96,7 @@
   <ItemGroup>
     <ClInclude Include="CoverAttach.hpp" />
     <ClInclude Include="CoverRemover.hpp" />
-    <ClInclude Include="CoverResizer.hpp" />
+    <ClInclude Include="CoverConverterResizer.hpp" />
     <ClInclude Include="DialogSettings.hpp" />
     <ClInclude Include="foo_cover_resizer.hpp" />
     <ClInclude Include="Helpers.hpp" />
@@ -106,7 +106,7 @@
   <ItemGroup>
     <ClCompile Include="ContextMenuResize.cpp" />
     <ClCompile Include="ContextMenuUtils.cpp" />
-    <ClCompile Include="CoverResizer.cpp" />
+    <ClCompile Include="CoverConverterResizer.cpp" />
     <ClCompile Include="foo_cover_resizer.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
     </ClCompile>
