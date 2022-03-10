@@ -10,7 +10,7 @@ void CoverConverterResizer::run(threaded_process_status& status, abort_callback&
 	album_art_extractor::ptr extractor_ptr;
 	auto lock_api = file_lock_manager::get();
 
-	const GUID what = m_action == Action::convert ? album_art_ids::cover_front : settings::get_guid();
+	const GUID what = settings::get_guid();
 	const size_t count = m_handles.get_count();
 	std::set<pfc::string8> paths;
 	uint32_t success{};
