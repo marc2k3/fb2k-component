@@ -3,12 +3,11 @@
 class CoverAttach : public threaded_process_callback
 {
 public:
-	CoverAttach(metadb_handle_list_cref handles, const album_art_data_ptr& data) : m_handles(handles), m_data(data) {}
+	CoverAttach(metadb_handle_list_cref handles, const album_art_data_ptr& data, const GUID& art_guid) : m_handles(handles), m_data(data), m_art_guid(art_guid) {}
 
 	void run(threaded_process_status& status, abort_callback& abort) override
 	{
 		auto api = file_lock_manager::get();
-		const GUID what = resizer::settings::get_guid();
 		const size_t count = m_handles.get_count();
 		std::set<pfc::string8> paths;
 
@@ -29,7 +28,7 @@ public:
 			{
 				auto lock = api->acquire_write(path, abort);
 				album_art_editor_instance_ptr aaep = ptr->open(nullptr, path, abort);
-				aaep->set(what, m_data, abort);
+				aaep->set(m_art_guid, m_data, abort);
 				aaep->commit(abort);
 			}
 			catch (...) {}
@@ -37,6 +36,7 @@ public:
 	}
 
 private:
+	GUID m_art_guid{};
 	album_art_data_ptr m_data;
 	metadb_handle_list m_handles;
 };

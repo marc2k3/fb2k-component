@@ -2,7 +2,7 @@
 
 using namespace resizer;
 
-CoverConverterResizer::CoverConverterResizer(Action action, metadb_handle_list_cref handles, Format format) : m_action(action), m_handles(handles), m_format(format) {}
+CoverConverterResizer::CoverConverterResizer(Action action, metadb_handle_list_cref handles, Format format, const GUID& art_guid) : m_action(action), m_handles(handles), m_format(format), m_art_guid(art_guid) {}
 
 void CoverConverterResizer::run(threaded_process_status& status, abort_callback& abort)
 {
@@ -10,7 +10,6 @@ void CoverConverterResizer::run(threaded_process_status& status, abort_callback&
 	album_art_extractor::ptr extractor_ptr;
 	auto lock_api = file_lock_manager::get();
 
-	const GUID what = settings::get_guid();
 	const size_t count = m_handles.get_count();
 	std::set<pfc::string8> paths;
 	uint32_t success{};
@@ -29,7 +28,7 @@ void CoverConverterResizer::run(threaded_process_status& status, abort_callback&
 
 		try
 		{
-			album_art_data_ptr data = extractor_ptr->open(nullptr, path, abort)->query(what, abort);
+			album_art_data_ptr data = extractor_ptr->open(nullptr, path, abort)->query(m_art_guid, abort);
 			if (data.is_empty()) continue;
 
 			const uint8_t* ptr = static_cast<const uint8_t*>(data->get_ptr());
@@ -59,7 +58,7 @@ void CoverConverterResizer::run(threaded_process_status& status, abort_callback&
 			auto lock = lock_api->acquire_write(path, abort);
 			album_art_editor::g_get_interface(editor_ptr, path);
 			album_art_editor_instance_ptr aaep = editor_ptr->open(nullptr, path, abort);
-			aaep->set(what, data, abort);
+			aaep->set(m_art_guid, data, abort);
 			aaep->commit(abort);
 			success++;
 		}

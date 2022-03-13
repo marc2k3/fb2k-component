@@ -46,12 +46,12 @@ public:
 
 		if (index == 0)
 		{
-			if (choose_settings(hwnd, true))
-			{
-				const Format format = formats[settings::format].first;
-				auto cb = fb2k::service_new<CoverConverterResizer>(CoverConverterResizer::Action::resize, handles, format);
-				threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Resizing covers...");
-			}
+			if (!choose_settings(hwnd, true)) return;
+
+			const Format format = formats[settings::format].first;
+			const GUID art_guid = album_art_ids::query_type(settings::type);
+			auto cb = fb2k::service_new<CoverConverterResizer>(CoverConverterResizer::Action::resize, handles, format, art_guid);
+			threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Resizing covers...");
 		}
 		else if (index == 1)
 		{
@@ -69,7 +69,8 @@ public:
 
 			if (data.is_valid())
 			{
-				auto cb = fb2k::service_new<CoverAttach>(handles, data);
+				const GUID art_guid = album_art_ids::query_type(settings::type);
+				auto cb = fb2k::service_new<CoverAttach>(handles, data, art_guid);
 				threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Attaching cover...");
 			}
 		}

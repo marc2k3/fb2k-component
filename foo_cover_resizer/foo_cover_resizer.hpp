@@ -50,6 +50,5 @@ namespace resizer
 		extern cfg_int type;
 		extern cfg_int format;
 		extern cfg_int size;
-		extern GUID get_guid();
 	}
 }
