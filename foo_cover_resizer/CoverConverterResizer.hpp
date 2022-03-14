@@ -13,6 +13,7 @@ public:
 
 	CoverConverterResizer(Action action, metadb_handle_list_cref handles, Format format, const GUID& art_guid);
 
+	void on_done(HWND, bool was_aborted) override;
 	void run(threaded_process_status& status, abort_callback& abort) override;
 
 private:

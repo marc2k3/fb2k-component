@@ -5,6 +5,13 @@ class CoverAttach : public threaded_process_callback
 public:
 	CoverAttach(metadb_handle_list_cref handles, const album_art_data_ptr& data, const GUID& art_guid) : m_handles(handles), m_data(data), m_art_guid(art_guid) {}
 
+	void on_done(HWND, bool was_aborted) override
+	{
+		if (was_aborted) return;
+
+		standard_commands::run_context(resizer::guid_foo_cover_info_command, m_handles);
+	}
+
 	void run(threaded_process_status& status, abort_callback& abort) override
 	{
 		auto api = file_lock_manager::get();

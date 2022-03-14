@@ -4,6 +4,13 @@ using namespace resizer;
 
 CoverConverterResizer::CoverConverterResizer(Action action, metadb_handle_list_cref handles, Format format, const GUID& art_guid) : m_action(action), m_handles(handles), m_format(format), m_art_guid(art_guid) {}
 
+void CoverConverterResizer::on_done(HWND, bool was_aborted)
+{
+	if (was_aborted) return;
+
+	standard_commands::run_context(guid_foo_cover_info_command, m_handles);
+}
+
 void CoverConverterResizer::run(threaded_process_status& status, abort_callback& abort)
 {
 	album_art_editor::ptr editor_ptr;
