@@ -49,7 +49,7 @@ public:
 		{
 			if (!choose_settings(hwnd, false)) return;
 
-			const Format format = formats[settings::format].first;
+			const Format format = formats[settings::format].id;
 			const GUID art_guid = album_art_ids::query_type(settings::type);
 			auto cb = fb2k::service_new<CoverConverterResizer>(CoverConverterResizer::Action::convert, handles, format, art_guid);
 			threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Converting covers...");
@@ -63,7 +63,7 @@ public:
 			if (!browse_for_image(hwnd, folder, source)) return;
 			if (!choose_settings(hwnd, false)) return;
 
-			const Format format = formats[settings::format].first;
+			const Format format = formats[settings::format].id;
 			if (FAILED(encode(format, source.get(), data))) return;
 
 			if (data.is_valid())

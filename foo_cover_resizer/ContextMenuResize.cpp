@@ -48,7 +48,7 @@ public:
 		{
 			if (!choose_settings(hwnd, true)) return;
 
-			const Format format = formats[settings::format].first;
+			const Format format = formats[settings::format].id;
 			const GUID art_guid = album_art_ids::query_type(settings::type);
 			auto cb = fb2k::service_new<CoverConverterResizer>(CoverConverterResizer::Action::resize, handles, format, art_guid);
 			threaded_process::get()->run_modeless(cb, threaded_process_flags, hwnd, "Resizing covers...");
@@ -64,7 +64,7 @@ public:
 			if (!choose_settings(hwnd, true)) return;
 			if (FAILED(resize(source.get(), scaler))) return;
 
-			const Format format = formats[settings::format].first;
+			const Format format = formats[settings::format].id;
 			if (FAILED(encode(format, scaler.get(), data))) return;
 
 			if (data.is_valid())

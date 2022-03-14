@@ -30,9 +30,13 @@ namespace resizer
 		WEBP,
 	};
 
-	using FormatPair = std::pair<Format, std::wstring>;
+	struct Formats
+	{
+		const Format id;
+		const std::wstring label;
+	};
 
-	static const std::vector<FormatPair> formats =
+	static const std::vector<Formats> formats =
 	{
 		{ Format::JPG, L"JPG" },
 		{ Format::PNG, L"PNG" },

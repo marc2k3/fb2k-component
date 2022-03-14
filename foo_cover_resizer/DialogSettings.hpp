@@ -27,9 +27,9 @@ namespace resizer
 				m_combo_type.AddString(string_wide_from_utf8_fast(album_art_ids::query_capitalized_name(i)));
 			}
 
-			for (const auto& format : formats)
+			for (const auto& [id, label] : formats)
 			{
-				m_combo_format.AddString(format.second.data());
+				m_combo_format.AddString(label.data());
 			}
 
 			m_combo_type.SetCurSel(settings::type);
