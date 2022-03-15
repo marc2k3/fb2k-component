@@ -6,9 +6,10 @@ CoverConverterResizer::CoverConverterResizer(Action action, metadb_handle_list_c
 
 void CoverConverterResizer::on_done(HWND, bool was_aborted)
 {
-	if (was_aborted) return;
-
-	standard_commands::run_context(guid_foo_cover_info_command, m_handles);
+	if (!was_aborted && m_art_guid == album_art_ids::cover_front)
+	{
+		standard_commands::run_context(resizer::guid_foo_cover_info_command, m_handles);
+	}
 }
 
 void CoverConverterResizer::run(threaded_process_status& status, abort_callback& abort)
